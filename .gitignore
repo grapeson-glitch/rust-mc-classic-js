@@ -1,0 +1,5 @@
+#Ignore ide files
+.vs/
+
+#Ignore compiled runnables
+*.exe
