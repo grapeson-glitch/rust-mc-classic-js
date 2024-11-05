@@ -723,6 +723,10 @@ var RandomLevel = function () {
         this.plant(aint);
 
         progress.tiles = this.tiles;
+
+        //Added line to output the tile map - Added by Sl1mj1m
+        console.log(progress.tiles);
+        
         progress.string = "";
         self.postMessage(progress);
 
