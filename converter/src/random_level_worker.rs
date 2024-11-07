@@ -22,16 +22,9 @@ impl Distort {
     }
 }
 
-// World generation as a worker.
-/*function Distort (source, distort) {
-
-    this.source = source;
-    this.distort = distort;
-    
-    this.getValue = function(x, y) {
-        return this.source.getValue(x + this.distort.getValue(x, y), y);
-    }
-}*/
+/*************************
+  Perlin Noise Function
+*************************/
 
 struct PerlinNoise {
     noise_levels: Vec<ImprovedNoise>,
@@ -68,32 +61,11 @@ impl PerlinNoise {
         return value;
     }
 }
-/*
-function PerlinNoise (random, levels) {
 
-    //var ImprovedNoise = require("./ImprovedNoise.js");
+/*************************
+  Improved Noise Function
+*************************/
 
-    var noiseLevels = [];
-    var levels = 8;
-
-    for (var i = 0; i < 8; ++i) {
-        noiseLevels[i] = new ImprovedNoise(random);
-    }
-    
-    this.getValue = function(x, y) {
-        var value = 0;
-        var pow = 1;
-
-        for (var i = 0; i < levels; i++) {
-            value += noiseLevels[i].getValue(x * pow, y * pow) / pow;
-            pow /= 2;
-        }
-
-        return value;
-    }
-
-}
-*/
 #[derive(Clone)]
 struct ImprovedNoise {
     p: Vec<i32>
@@ -166,69 +138,3 @@ impl ImprovedNoise {
         return ImprovedNoise::lerp(d7, ImprovedNoise::lerp(d6, ImprovedNoise::lerp(d5, ImprovedNoise::grad(self.p[i1 as usize], d4, d3, d2), ImprovedNoise::grad(self.p[j as usize], d4 - 1.0, d3, d2)), ImprovedNoise::lerp(d5, ImprovedNoise::grad(self.p[l as usize], d4, d3 - 1.0, d2), ImprovedNoise::grad(self.p[i as usize], d4 - 1.0, d3 - 1.0, d2))), ImprovedNoise::lerp(d6, ImprovedNoise::lerp(d5, ImprovedNoise::grad(self.p[(i1 + 1) as usize], d4, d3, d2 - 1.0), ImprovedNoise::grad(self.p[(j + 1) as usize], d4 - 1.0, d3, d2 - 1.0)), ImprovedNoise::lerp(d5, ImprovedNoise::grad(self.p[(l + 1) as usize], d4, d3 - 1.0, d2 - 1.0), ImprovedNoise::grad(self.p[(i + 1) as usize], d4 - 1.0, d3 - 1.0, d2 - 1.0))));
     }
 }
-
-
-/*
-function ImprovedNoise (random) {
-
-    var fadeCurve = function(d0) {
-        return d0 * d0 * d0 * (d0 * (d0 * 6.0 - 15.0) + 10.0);
-    }
-
-    var lerp = function(d0, d1, d2) {
-        return d1 + d0 * (d2 - d1);
-    }
-
-    var grad = function(i, d0, d1, d2) {
-        var d3 = (i &= 15) < 8 ? d0 : d1;
-        var d4 = i < 4 ? d1 : (i != 12 && i != 14 ? d2 : d0);
-
-        return ((i & 1) == 0 ? d3 : -d3) + ((i & 2) == 0 ? d4 : -d4);
-    }
-
-   	
-	this.p = [];
-
-    for (var i = 0; i < 256; i++) {
-        this.p[i] = i;
-    }
-
-    for (var i = 0; i < 256; i++) {
-        //var j = random.nextInt(256 - i) + i;
-        //var j = Math.round( Math.random() * 256-i ) + i;
-        var j = Math.round( random * (256-i) ) + i;
-
-        var tmp = this.p[i];
-        this.p[i] = this.p[j];
-        this.p[j] = tmp;
-
-        this.p[i + 256] = this.p[i];
-    }
-
-
-    this.getValue = function(d0, d1) {
-        var d2 = 0.0;
-        var d3 = d1;
-        var d4 = d0;
-        var i = Math.floor(d0) & 255;
-        var j = Math.floor(d1) & 255;
-        var k = Math.floor(0.0) & 255;
-
-        d4 -= Math.floor(d4);
-        d3 -= Math.floor(d3);
-        d2 = 0.0 - Math.floor(0.0);
-        var d5 = fadeCurve(d4);
-        var d6 = fadeCurve(d3);
-        var d7 = fadeCurve(d2);
-        var l = this.p[i] + j;
-        var i1 = this.p[l] + k;
-
-        l = this.p[l + 1] + k;
-        i = this.p[i + 1] + j;
-        j = this.p[i] + k;
-        i = this.p[i + 1] + k;
-        return lerp(d7, lerp(d6, lerp(d5, grad(this.p[i1], d4, d3, d2), grad(this.p[j], d4 - 1.0, d3, d2)), lerp(d5, grad(this.p[l], d4, d3 - 1.0, d2), grad(this.p[i], d4 - 1.0, d3 - 1.0, d2))), lerp(d6, lerp(d5, grad(this.p[i1 + 1], d4, d3, d2 - 1.0), grad(this.p[j + 1], d4 - 1.0, d3, d2 - 1.0)), lerp(d5, grad(this.p[l + 1], d4, d3 - 1.0, d2 - 1.0), grad(this.p[i + 1], d4 - 1.0, d3 - 1.0, d2 - 1.0))));
-    }
-
-}
-*/
