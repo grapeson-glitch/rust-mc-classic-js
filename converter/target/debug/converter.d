@@ -1,0 +1,1 @@
+C:\Users\keile\Documents\GitHub\jsToJava\ClassicJavascript-to-Java-Converter\converter\target\debug\converter.exe: C:\Users\keile\Documents\GitHub\jsToJava\ClassicJavascript-to-Java-Converter\converter\src\main.rs
