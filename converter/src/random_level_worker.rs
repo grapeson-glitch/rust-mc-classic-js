@@ -350,6 +350,10 @@ impl RandomLevel {
             }
         }
     }
+
+    pub fn placeOre (self, tile: u8, j: i32, k: i32, l: i32) {
+
+    }
 }
 
 
