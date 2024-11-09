@@ -153,7 +153,7 @@ struct RandomLevel {
     random: Random,
     rand: f64,
     tiles: Vec<u8>,
-    fill_queue: Vec<u8>
+    fill_queue: Vec<i32>
 
 }
 
@@ -169,7 +169,7 @@ impl RandomLevel {
         let mut random: Random = Random::new(seed);
         let rand: f64 = random.nextFloat();
         let tiles: Vec<u8> = Vec::new();
-        let fill_queue: Vec<u8> = Vec::new();
+        let fill_queue: Vec<i32> = Vec::new();
 
         RandomLevel {
             progress_string,
@@ -232,7 +232,7 @@ impl RandomLevel {
     //melt
     pub fn melt (&mut self) {
         let mut i: i32 = 0;
-        let mut j: i32 = self.x_size * self.z_size * self.y_size / 10000;
+        let j: i32 = self.x_size * self.z_size * self.y_size / 10000;
 
         for k in 0..j {
             if k % 100 == 0 {
@@ -240,10 +240,10 @@ impl RandomLevel {
                 //self.postMessage(progress);
             }
 
-            let mut extray: i32 = 16;
-            let mut l: i32 = self.random.nextInt(self.x_size);
-            let mut i1: i32 = self.random.nextInt(self.y_size / 2 - 4) + extray;
-            let mut j1: i32 = self.random.nextInt(self.z_size);
+            let extray: i32 = 16;
+            let l: i32 = self.random.nextInt(self.x_size);
+            let i1: i32 = self.random.nextInt(self.y_size / 2 - 4) + extray;
+            let j1: i32 = self.random.nextInt(self.z_size);
 
             if self.tiles[((i1 * self.z_size + j1) * self.x_size + l) as usize] == 0 {
                 i += 1;
@@ -351,65 +351,186 @@ impl RandomLevel {
         }
     }
 
-    pub fn placeOre (self, tile: u8, j: i32, k: i32, l: i32) {
+    pub fn placeOre (&mut self, tile: u8, j: i32, k: i32, mut l: i32) {
+        l = self.x_size;
+        let i1: i32 = self.z_size;
+        let j1: i32 = self.y_size;
+        let k1: i32 = l * i1 * j1 / 256 / 64 * j / 100;
 
-    }
-}
+        for l1 in 0..k1 {
+            self.progress_percent = l1 * 100 / (k1 - 1) / 4 + k * 100 / 4;
+            //self.postMessage(progress);
 
+            let mut f: f64 = self.random.nextFloat() * l as f64;
+            let mut f1: f64 = self.random.nextFloat() * j1 as f64;
+            let mut f2: f64 = self.random.nextFloat() * i1 as f64;
+            let i2: i32 = ((self.random.nextFloat() + self.random.nextFloat()) * 75.0 * j as f64 / 100.0) as i32; //parseInt()
+            let mut f3: f64 = self.random.nextFloat() * 3.141592653589793 * 2.0;
+            let mut f4: f64 = 0.0;
+            let mut f5: f64 = self.random.nextFloat() * 3.141592653589793 * 2.0;
+            let mut f6: f64 = 0.0;
 
+            for j2 in 0..i2 {
+                f =  f + f64::sin(f3) * f64::cos(f5);
+                f2 = f2 + f64::cos(f3) * f64::cos(f5);
+                f1 = f1 + f64::sin(f5);
+                f3 += f4 * 0.2;
+                f4 *= 0.9;
+                f4 = f4 + (self.random.nextFloat() - self.random.nextFloat());
+                f5 = (f5 + f6 * 0.5) * 0.5;
+                f6 *= 0.9;
+                f6 = f6 + (self.random.nextFloat() - self.random.nextFloat());
+                let f7: f64 = f64::sin(j2 as f64 * 3.141592653589793 / i2 as f64) * j as f64 / 100.0 + 1.0;
 
-/*
-// place ore
-        this.placeOre = function(tile, j, k, l) {
-            l = this.xSize;
-            var i1 = this.zSize;
-            var j1 = this.ySize;
-            var k1 = l * i1 * j1 / 256 / 64 * j / 100;
+                let mut k2:f64  = (f - f7).round();
 
-            for (var l1 = 0; l1 < k1; ++l1) {
-                //this.progress(l1 * 100 / (k1 - 1) / 4 + k * 100 / 4);
-                progress.percent = l1 * 100 / (k1 - 1) / 4 + k * 100 / 4;
-                self.postMessage(progress);
+                while k2 <= (f + f7).round() {
 
-                var f = random.nextFloat() * l;
-                var f1 = random.nextFloat() * j1;
-                var f2 = random.nextFloat() * i1;
-                var i2 = parseInt( ((random.nextFloat() + random.nextFloat()) * 75.0 * j / 100.0) , 10);
-                var f3 = (random.nextFloat() * 3.141592653589793 * 2.0);
-                var f4 = 0.0;
-                var f5 = (random.nextFloat() * 3.141592653589793 * 2.0);
-                var f6 = 0.0;
+                    let mut l2: f64 = (f1 - f7).round();
 
-                for (var j2 = 0; j2 < i2; ++j2) {
-                    f = ( f + Math.sin(f3) * Math.cos(f5));
-                    f2 = ( f2 + Math.cos(f3) * Math.cos(f5));
-                    f1 = ( f1 + Math.sin(f5));
-                    f3 += f4 * 0.2;
-                    f4 = (f4 *= 0.9) + (random.nextFloat() - random.nextFloat());
-                    f5 = (f5 + f6 * 0.5) * 0.5;
-                    f6 = (f6 *= 0.9) + (random.nextFloat() - random.nextFloat());
-                    var f7 = (Math.sin(j2 * 3.141592653589793 / i2) * j / 100.0 + 1.0);
+                    while l2 <= (f1 + f7).round() {
 
-                    for (var k2 = Math.round(f - f7); k2 <= Math.round(f + f7); ++k2) {
-                        for (var l2 = Math.round(f1 - f7); l2 <= Math.round(f1 + f7); ++l2) {
-                            for (var i3 = Math.round(f2 - f7); i3 <= Math.round(f2 + f7); ++i3) {
-                                var f8 = k2 - f;
-                                var f9 = l2 - f1;
-                                var f10 = i3 - f2;
+                        let mut i3: f64 = (f2 - f7).round();
 
-                                if (f8 * f8 + f9 * f9 * 2.0 + f10 * f10 < f7 * f7 && k2 >= 1 && l2 >= 1 && i3 >= 1 && k2 < this.xSize - 1 && l2 < this.ySize - 1 && i3 < this.zSize - 1) {
-                                    var j3 = parseInt( (l2 * this.zSize + i3) * this.xSize + k2 , 10);
+                        while i3 <= (f2 + f7).round() {
+                            let f8: f64 = k2 - f;
+                            let f9: f64 = l2 - f1;
+                            let f10: f64 = i3 - f2;
 
-                                    //if (this.tiles[j3] == Tile.rock.id) {
-                                    if (this.tiles[j3] == 2) {
-                                        this.tiles[j3] = tile;
-                                    }
+                            if f8 * f8 + f9 * f9 * 2.0 + f10 * f10 < f7 * f7 && k2 >= 1.0 && l2 >= 1.0 && i3 >= 1.0 && k2 < self.x_size as f64 - 1.0 && l2 < self.y_size as f64 - 1.0 && i3 < self.z_size as f64 - 1.0 {
+                                let j3: i32 = ((l2 * self.z_size as f64 + i3) * self.x_size as f64 + k2) as i32; //parseInt()
+
+                                //if (this.tiles[j3] == Tile.rock.id) {
+                                if self.tiles[j3 as usize] == 2 {
+                                    self.tiles[j3 as usize] = tile;
                                 }
                             }
+                            i3 += 1.0;
                         }
+                        l2 += 1.0;
                     }
+                    k2 += 1.0;
                 }
             }
         }
-*/
+    }
+
+    pub fn flood_fill (&mut self, xc: i32, yc: i32, zc: i32, unused: u8, tile: u8) -> i32 {
+        let mut w_bits: i32 = 1;
+        let mut h_bits: i32 = 1;
+
+        while (1 << w_bits) < self.x_size { w_bits += 1; }
+        while (1 << h_bits) < self.y_size { h_bits += 1; }
+
+        let z_mask: i32 = self.z_size - 1;
+        let x_mask: i32 = self.x_size - 1;
+        let mut count: i32 = 1;
+
+        self.fill_queue[0] = ((yc << h_bits) + zc << w_bits) + xc;
+
+        let mut k2: i32 = 0;
+
+        let offset: i32 = self.x_size * self.z_size;
+
+        while count > 0 {
+
+            count -= 1;
+
+            let mut val: i32 = self.fill_queue[count as usize];
+
+            let z: i32 = val >> w_bits & z_mask;
+            let l2: i32 = val >> w_bits + h_bits;
+
+            let mut i3: i32 = 0;
+            let mut j3: i32 = 0;
+
+            i3 = val & x_mask;
+            j3 = i3;
+
+            while i3 > 0 && self.tiles[(val - 1) as usize] == 0 {
+                i3 -= 1;
+                val -= 1;
+            }
+
+            while j3 < self.x_size && self.tiles[(val + j3 - i3) as usize] == 0 {
+                j3 += 1;
+            }
+
+            let k3: i32 = val >> w_bits & z_mask;
+            let l3: i32 = val >> w_bits + h_bits;
+
+            if k3 != z || l3 != l2 {
+                //System.out.println("hoooly fuck");
+                //console.log("hoooly fuck")
+                println!("hoooly fuck");
+            }
+
+            let mut flag: bool = false;
+            let mut flag1: bool = false;
+            let mut flag2: bool = false;
+
+            k2 += j3 - i3;
+
+            i3 = i3;
+
+            while i3 < j3 {
+
+                self.tiles[val as usize] = tile;
+                let mut flag3: bool;
+
+                if z > 0 {
+
+                    flag3 = self.tiles[(val - self.x_size) as usize] == 0;
+
+                    if flag3 && !flag {
+
+                        count += 1;
+                        self.fill_queue[count as usize] = val - self.x_size;
+
+                    }
+
+                    flag = flag3;
+
+                }
+
+                if z < self.z_size - 1 {
+
+                    flag3 = self.tiles[(val + self.x_size) as usize] == 0;
+
+                    if flag3 && !flag1 {
+
+                        count += 1;
+                        self.fill_queue[count as usize] = val + self.x_size;
+
+                    }
+
+                    flag1 = flag3;
+
+                }
+
+                if l2 > 0 {
+                    let b2: u8 = self.tiles[(val - offset) as usize];
+
+                    //if (( tile == Tile.lava.id || tile == Tile.calmLava.id) && (b2 == Tile.water.id || b2 == Tile.calmWater.id)) {
+                    if ( tile == 17) && (b2 == 7) {
+                        self.tiles[(val - offset) as usize] = 2;//Tile.rock.id;
+                    }
+
+                    flag3 = b2 == 0;
+                    if flag3 && !flag2 {
+
+                        count += 1;
+                        self.fill_queue[count as usize] = val - offset;
+
+                    }
+
+                    flag2 = flag3;
+                }
+                val += 1;
+                i3 += 1;
+            }
+        }
+        return k2;
+    }
+}
 
