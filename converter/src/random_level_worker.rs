@@ -32,7 +32,7 @@ struct PerlinNoise {
 }
 
 impl PerlinNoise {
-    fn new (random: f64, levels: i32) -> Self {
+    fn new (random: f64, _levels: i32) -> Self {
 
         let mut noise_levels: Vec<ImprovedNoise> = Vec::new();
         let levels: i32 = 8;
@@ -82,8 +82,8 @@ impl ImprovedNoise {
         for i in 0..256 {
             //var j = random.nextInt(256 - i) + i;
             //var j = Math.round( Math.random() * 256-i ) + i;
-            let mut j: i32 = (random * (256.0 - i as f64)).round() as i32 + i;
-            let mut tmp: i32 = p[i as usize];
+            let j: i32 = (random * (256.0 - i as f64)).round() as i32 + i;
+            let tmp: i32 = p[i as usize];
             p[i as usize] = p[j as usize];
             p[j as usize] = tmp;
 
@@ -158,7 +158,7 @@ struct RandomLevel {
 
 impl RandomLevel {
 
-    pub fn new (self, seed: i32, x_size: i32, z_size: i32, mut y_size: i32) -> RandomLevel {
+    pub fn new (seed: i32, x_size: i32, z_size: i32, mut y_size: i32) -> RandomLevel {
         let progress_string: String = String::from("");
         let progress_percent: i32 = 0;
         let progress_tiles: Vec<u8> = Vec::new();
@@ -230,7 +230,7 @@ impl RandomLevel {
 
     //melt
     pub fn melt (&mut self) {
-        let mut i: i32 = 0;
+        let mut _i: i32 = 0;
         let j: i32 = self.x_size * self.z_size * self.y_size / 10000;
 
         for k in 0..j {
@@ -245,7 +245,7 @@ impl RandomLevel {
             let j1: i32 = self.random.nextInt(self.z_size);
 
             if self.tiles[((i1 * self.z_size + j1) * self.x_size + l) as usize] == 0 {
-                i += 1;
+                _i += 1;
                 self.flood_fill(l, i1, j1, 0, 17);
 
             }
@@ -799,3 +799,12 @@ impl RandomLevel {
     }
 }
 
+pub fn start_generation (world_size: i32, seed: i32) { //{worldSize: worldSize, seed: props.seed, seedrandom: seedrandom}
+    
+    let width: i32 = world_size;
+    let depth: i32 = world_size;
+    let height: i32 = 64;
+
+    let mut level = RandomLevel::new(seed, width, depth, height);
+    level.create_level();
+}
