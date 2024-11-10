@@ -80,7 +80,7 @@ impl ImprovedNoise {
         }
 
         for i in 0..256 {
-            //var j = random.nextInt(256 - i) + i;
+            //var j = random.next_int(256 - i) + i;
             //var j = Math.round( Math.random() * 256-i ) + i;
             let j: i32 = (random * (256.0 - i as f64)).round() as i32 + i;
             let tmp: i32 = p[i as usize];
@@ -166,7 +166,7 @@ impl RandomLevel {
         y_size = 64;
 
         let mut random: Random = Random::new(seed);
-        let rand: f64 = random.nextFloat();
+        let rand: f64 = random.next_float();
         let tiles: Vec<u8> = Vec::new();
         let fill_queue: Vec<i32> = Vec::new();
 
@@ -240,9 +240,9 @@ impl RandomLevel {
             }
 
             let extray: i32 = 16;
-            let l: i32 = self.random.nextInt(self.x_size);
-            let i1: i32 = self.random.nextInt(self.y_size / 2 - 4) + extray;
-            let j1: i32 = self.random.nextInt(self.z_size);
+            let l: i32 = self.random.next_int(self.x_size);
+            let i1: i32 = self.random.next_int(self.y_size / 2 - 4) + extray;
+            let j1: i32 = self.random.next_int(self.z_size);
 
             if self.tiles[((i1 * self.z_size + j1) * self.x_size + l) as usize] == 0 {
                 _i += 1;
@@ -261,20 +261,20 @@ impl RandomLevel {
             self.progress_percent = k * 100 / (j - 1);
             //self.postMessage(progress);
 
-            let l: i32 = self.random.nextInt(self.x_size);
-            let i1: i32 = self.random.nextInt(self.z_size);
+            let l: i32 = self.random.next_int(self.x_size);
+            let i1: i32 = self.random.next_int(self.z_size);
 
             for _ in 0..20 {
                 let mut k1: i32 = l;
                 let mut l1: i32 = i1;
 
                 for _ in 0..20 {
-                    k1 += self.random.nextInt(6) - self.random.nextInt(6);
-                    l1 += self.random.nextInt(6) - self.random.nextInt(6);
+                    k1 += self.random.next_int(6) - self.random.next_int(6);
+                    l1 += self.random.next_int(6) - self.random.next_int(6);
 
                     if k1 >= 0 && l1 >= 0 && k1 < self.x_size && l1 < self.z_size {
                         let j2: f64 = aint[(k1 + l1 * i) as usize] + 1.0;//No idea if this is supposed to be a float or an int...
-                        let k2: i32 = self.random.nextInt(3) + 4;
+                        let k2: i32 = self.random.next_int(3) + 4;
                         let mut flag: bool = true;
 
                         let mut l2: f64 = j2;
@@ -327,7 +327,7 @@ impl RandomLevel {
 
                                             let k4: i32 = (j4 - l1) as i32;
 
-                                            if i32::abs(i4) != k3 || i32::abs(k4) != k3 || self.random.nextInt(2) != 0 && j3 != 0.0 {
+                                            if i32::abs(i4) != k3 || i32::abs(k4) != k3 || self.random.next_int(2) != 0 && j3 != 0.0 {
                                                 self.tiles[((i3 * self.z_size as f64 + j4 as f64) * self.x_size as f64 + l3 as f64) as usize] = 14;//(byte) Tile.leaves.id;
                                             }
                                             j4 += 1;
@@ -360,13 +360,13 @@ impl RandomLevel {
             self.progress_percent = l1 * 100 / (k1 - 1) / 4 + k * 100 / 4;
             //self.postMessage(progress);
 
-            let mut f: f64 = self.random.nextFloat() * l as f64;
-            let mut f1: f64 = self.random.nextFloat() * j1 as f64;
-            let mut f2: f64 = self.random.nextFloat() * i1 as f64;
-            let i2: i32 = ((self.random.nextFloat() + self.random.nextFloat()) * 75.0 * j as f64 / 100.0) as i32; //parseInt()
-            let mut f3: f64 = self.random.nextFloat() * 3.141592653589793 * 2.0;
+            let mut f: f64 = self.random.next_float() * l as f64;
+            let mut f1: f64 = self.random.next_float() * j1 as f64;
+            let mut f2: f64 = self.random.next_float() * i1 as f64;
+            let i2: i32 = ((self.random.next_float() + self.random.next_float()) * 75.0 * j as f64 / 100.0) as i32; //parseInt()
+            let mut f3: f64 = self.random.next_float() * 3.141592653589793 * 2.0;
             let mut f4: f64 = 0.0;
-            let mut f5: f64 = self.random.nextFloat() * 3.141592653589793 * 2.0;
+            let mut f5: f64 = self.random.next_float() * 3.141592653589793 * 2.0;
             let mut f6: f64 = 0.0;
 
             for j2 in 0..i2 {
@@ -375,10 +375,10 @@ impl RandomLevel {
                 f1 = f1 + f64::sin(f5);
                 f3 += f4 * 0.2;
                 f4 *= 0.9;
-                f4 = f4 + (self.random.nextFloat() - self.random.nextFloat());
+                f4 = f4 + (self.random.next_float() - self.random.next_float());
                 f5 = (f5 + f6 * 0.5) * 0.5;
                 f6 *= 0.9;
-                f6 = f6 + (self.random.nextFloat() - self.random.nextFloat());
+                f6 = f6 + (self.random.next_float() - self.random.next_float());
                 let f7: f64 = f64::sin(j2 as f64 * 3.141592653589793 / i2 as f64) * j as f64 / 100.0 + 1.0;
 
                 let mut k2:f64  = (f - f7).round();
@@ -666,14 +666,14 @@ impl RandomLevel {
             self.progress_percent = i1 * 100 / (l - 1) / 4;
             //self.postMessage(progress);
 
-            let mut f1: f64 = self.random.nextFloat() * k2 as f64;
-            let mut f2: f64 = self.random.nextFloat() * k1 as f64;
-            let mut f3: f64 = self.random.nextFloat() * j1 as f64;
+            let mut f1: f64 = self.random.next_float() * k2 as f64;
+            let mut f2: f64 = self.random.next_float() * k1 as f64;
+            let mut f3: f64 = self.random.next_float() * j1 as f64;
 
-            i3 = (self.random.nextFloat() + self.random.nextFloat()) * 75.0;
-            let mut f4: f64 = self.random.nextFloat() * 3.141592653589793 * 2.0;
+            i3 = (self.random.next_float() + self.random.next_float()) * 75.0;
+            let mut f4: f64 = self.random.next_float() * 3.141592653589793 * 2.0;
             let mut f5: f64 = 0.0;
-            let mut f6: f64 = self.random.nextFloat() * 3.141592653589793 * 2.0;
+            let mut f6: f64 = self.random.next_float() * 3.141592653589793 * 2.0;
             let mut f7: f64 = 0.0;
 
             let mut l3: f64 = 0.0;
@@ -683,14 +683,14 @@ impl RandomLevel {
                 f2 = f2 + f64::sin(f6);
                 f4 += f5 * 0.2;
                 f5 *= 0.9;
-                f5 = f5 + (self.random.nextFloat() - self.random.nextFloat());
+                f5 = f5 + (self.random.next_float() - self.random.next_float());
                 f6 = (f6 + f7 * 0.5) * 0.5;
                 f7 *= 0.9;
-                f7 = f7 + (self.random.nextFloat() - self.random.nextFloat());
-                if self.random.nextFloat() >= 0.3 {
-                    let f8: f64 = f1 + self.random.nextFloat() * 4.0 - 2.0;
-                    let f9: f64 = f2 + self.random.nextFloat() * 4.0 - 2.0;
-                    let f10: f64 = f3 + self.random.nextFloat() * 4.0 - 2.0;
+                f7 = f7 + (self.random.next_float() - self.random.next_float());
+                if self.random.next_float() >= 0.3 {
+                    let f8: f64 = f1 + self.random.next_float() * 4.0 - 2.0;
+                    let f9: f64 = f2 + self.random.next_float() * 4.0 - 2.0;
+                    let f10: f64 = f3 + self.random.next_float() * 4.0 - 2.0;
                     let f11: f64 = f64::sin( l3 * 3.141592653589793 / i3) * 2.5 + 1.0;
 
                     let mut i4: i32 = (f8 - f11) as i32; //parseInt()
@@ -730,7 +730,7 @@ impl RandomLevel {
         self.progress_string = String::from("Watering..");
         //this.progressRenderer.progressStage("Watering..");
         //long i5 = System.nanoTime();
-        let _i5: f64 = self.random.nextFloat();//Math.random();
+        let _i5: f64 = self.random.next_float();//Math.random();
         let mut j5: u8 = 0;
 
         l = 7;//Tile.calmWater.id;
@@ -765,9 +765,9 @@ impl RandomLevel {
                 //self.postMessage(progress);
             }
 
-            let i4: i32 = self.random.nextInt(self.x_size); //i2
-            let l4: i32 = self.y_size / 2 - 1 - self.random.nextInt(3) + extray; //l2
-            let i6: i32 = self.random.nextInt(self.z_size); //i3
+            let i4: i32 = self.random.next_int(self.x_size); //i2
+            let l4: i32 = self.y_size / 2 - 1 - self.random.next_int(3) + extray; //l2
+            let i6: i32 = self.random.next_int(self.z_size); //i3
             if self.tiles[((l4 * self.z_size + i6) * self.x_size + i4) as usize] == 0 {
                 j5 += self.flood_fill(i4, l4, i6, 0, l as u8);
             }
