@@ -15,7 +15,7 @@ impl Random {
     * Returns a pseudo-random value between 1 and 2^32 - 2.
     */
     pub fn next (&mut self) -> i32 {
-        self.rand = self.rand * 16807 % 2147483647;
+        self.rand = (self.rand as u128 * 16807 as u128 % 2147483647 as u128) as i32;
         return self.rand;
     }
 

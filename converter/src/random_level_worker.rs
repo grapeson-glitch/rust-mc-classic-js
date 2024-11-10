@@ -88,11 +88,10 @@ impl ImprovedNoise {
             p[j as usize] = tmp;
 
             p[(i + 256) as usize] = p[i as usize];
+
         }
 
-        ImprovedNoise {
-            p
-        }
+        ImprovedNoise { p }
     }
 
     pub fn fade_curve (&self, d0: f64) -> f64 {
