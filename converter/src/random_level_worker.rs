@@ -203,12 +203,12 @@ impl RandomLevel {
                 let j1: i32;
                 //var k1 = parseInt( ((j1 = parseInt(aint[l + i1 * i],10)) * this.zSize + i1) * this.xSize + l, 10);
                 j1 = aint[(l + i1 * i) as usize] as i32;
-                let k1: i32 = ((j1 * self.z_size + i1) * self.x_size + l) as i32;
+                let k1: i32 = ((j1 * self.z_size + i1) * self.x_size + l) as i32;//parseInt()
                 let l1: i32;
 
                 // 7 waterid
                 //if (((l1 = parseInt(this.tiles[((j1 + 1) * this.zSize + i1) * this.xSize + l],10) & 255) == 7) && j1 <= k / 2 - 1 && flag1) {
-                l1 = (self.tiles[(((j1 + 1) * self.z_size + i1) * self.x_size + l) as usize]) as i32 & 255;
+                l1 = (self.tiles[(((j1 + 1) * self.z_size + i1) * self.x_size + l) as usize]) as i32 & 255;//parseInt()
                 if (l1 == 7) && j1 <= k / 2 - 1 && flag1 {
 
                     self.tiles[k1 as usize] = 12;//(byte) Tile.gravel.id;
@@ -314,17 +314,17 @@ impl RandomLevel {
                                 while i3 <= j2 + k2 as f64 {
 
                                     j3 = i3 - (j2 + k2 as f64);
-                                    let k3: i32 = (1.0 - j3 / 2.0) as i32;
+                                    let k3: i32 = (1.0 - j3 / 2.0) as i32;//parseInt()
                                     let mut l3: i32 = k1 - k3;
 
                                     while l3 <= k1 + k3 {
 
-                                        let i4: i32 = (l3 - k1) as i32;
+                                        let i4: i32 = (l3 - k1) as i32;//parseInt()
                                         let mut j4: i32 = l1 - k3;
 
                                         while j4 <= l1 + k3 {
 
-                                            let k4: i32 = (j4 - l1) as i32;
+                                            let k4: i32 = (j4 - l1) as i32;//parseInt()
 
                                             if i32::abs(i4) != k3 || i32::abs(k4) != k3 || self.random.next_int(2) != 0 && j3 != 0.0 {
                                                 self.tiles[((i3 * self.z_size as f64 + j4 as f64) * self.x_size as f64 + l3 as f64) as usize] = 14;//(byte) Tile.leaves.id;
@@ -703,7 +703,7 @@ impl RandomLevel {
                                 let f14: f64 = k4 - f10;
 
                                 if f12 * f12 + f13 * f13 * 2.0 + f14 * f14 < f11 * f11 && i4 >= 1 && j4 >= 1 && k4 >= 1.0 && i4 < self.x_size - 1 && j4 < self.y_size - 1 && k4 < self.z_size as f64 - 1.0 {
-                                    let l4: i32 = (((j4 as f64 * self.z_size as f64 + k4) * self.x_size as f64) + i4 as f64) as i32;
+                                    let l4: i32 = (((j4 as f64 * self.z_size as f64 + k4) * self.x_size as f64) + i4 as f64) as i32;//parseInt()
 
                                     //if (tiles[l4] == Tile.rock.id) {
                                     if self.tiles[l4 as usize] == 2 {
