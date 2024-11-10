@@ -1,5 +1,4 @@
-use crate::random::{self, Random};
-use std::str::FromStr;
+use crate::random::Random;
 
 
 //Creating the Distort struct
@@ -351,7 +350,7 @@ impl RandomLevel {
         }
     }
 
-    pub fn placeOre (&mut self, tile: u8, j: i32, k: i32, mut l: i32) {
+    pub fn place_ore (&mut self, tile: u8, j: i32, k: i32, mut l: i32) {
         l = self.x_size;
         let i1: i32 = self.z_size;
         let j1: i32 = self.y_size;
@@ -415,7 +414,7 @@ impl RandomLevel {
         }
     }
 
-    pub fn flood_fill (&mut self, xc: i32, yc: i32, zc: i32, unused: u8, tile: u8) -> i32 {
+    pub fn flood_fill (&mut self, xc: i32, yc: i32, zc: i32, _unused: u8, tile: u8) -> u8 {
         let mut w_bits: i32 = 1;
         let mut h_bits: i32 = 1;
 
@@ -428,7 +427,7 @@ impl RandomLevel {
 
         self.fill_queue[0] = ((yc << h_bits) + zc << w_bits) + xc;
 
-        let mut k2: i32 = 0;
+        let mut k2: u8 = 0;
 
         let offset: i32 = self.x_size * self.z_size;
 
@@ -441,8 +440,8 @@ impl RandomLevel {
             let z: i32 = val >> w_bits & z_mask;
             let l2: i32 = val >> w_bits + h_bits;
 
-            let mut i3: i32 = 0;
-            let mut j3: i32 = 0;
+            let mut i3: i32;
+            let mut j3: i32;
 
             i3 = val & x_mask;
             j3 = i3;
@@ -469,7 +468,7 @@ impl RandomLevel {
             let mut flag1: bool = false;
             let mut flag2: bool = false;
 
-            k2 += j3 - i3;
+            k2 += (j3 - i3) as u8;
 
             i3 = i3;
 
@@ -531,6 +530,272 @@ impl RandomLevel {
             }
         }
         return k2;
+    }
+
+    pub fn create_level (&mut self) {
+        
+        self.progress_string = String::from("Raising..");
+
+        let distort: Distort = Distort::new(PerlinNoise::new(self.rand, 8), PerlinNoise::new(self.rand, 8));
+        let mut distort1: Distort = Distort::new(PerlinNoise::new(self.rand, 8), PerlinNoise::new(self.rand, 8));
+        let perlinnoise: PerlinNoise = PerlinNoise::new(self.rand, 8);
+
+        // 256x256 array of world noise
+        let mut aint: Vec<f64> = Vec::new();
+
+        let f: f64 = 1.3;
+
+        let mut l: i32 = 0;
+        let mut i1: i32;
+
+        while l < self.x_size {
+            self.progress_percent = l * 100 / (self.x_size - 1);
+            //self.postMessage(progress);
+
+            i1 = 0;
+
+            while i1 < self.z_size {
+                let d0: f64 = distort.get_value( l as f64 * f, i1 as f64 * f) / 8.0 - 8.0;
+                let mut d1: f64 = distort1.get_value( l as f64 * f, i1 as f64 * f) / 6.0 + 6.0;
+
+                if perlinnoise.get_value( l as f64, i1 as f64) / 8.0 > 0.0 {
+                    d1 = d0;
+                }
+
+                let mut d2: f64;
+                d2 = f64::max(d0, d1) / 2.0; 
+
+                if d2 < 0.0 {
+                    d2 *= 0.8;
+                }
+
+                aint[(l + i1 * self.x_size) as usize] = d2;
+                i1 += 1;
+            }
+            l += 1;
+        }
+
+        self.progress_string = String::from("Eroding..");
+        let mut aint1: Vec<f64> = aint.clone();
+
+        distort1 = Distort::new(PerlinNoise::new(self.rand, 8), PerlinNoise::new(self.rand, 8));
+        let distort2: Distort = Distort::new(PerlinNoise::new(self.rand, 8), PerlinNoise::new(self.rand, 8));
+        
+        let mut j1: i32;
+        let mut k1: i32;
+        let mut l1: f64;
+        let mut i2: f64;
+
+        j1 = 0;
+        while j1 < self.x_size {
+            
+            self.progress_percent = j1 * 100 / (self.x_size - 1);
+            //self.postMessage(progress);
+
+            k1 = 0;
+            while k1 < self.z_size {
+                let d3: f64 = distort1.get_value( (j1 << 1) as f64, (k1 << 1) as f64) / 8.0;
+
+                l1 = if distort2.get_value( (j1 << 1) as f64, (k1 << 1) as f64) > 0.0 {1.0} else {0.0};
+                if d3 > 2.0 {
+                    i2 = ((((aint1[(j1 + k1 * self.x_size) as usize] - l1) / 2.0) as i32) << 1) as f64 + l1; //What on earth were you doing trying to bit shift a double???
+                    aint1[(j1 + k1 * self.x_size) as usize] = i2;
+                }
+                k1 += 1;
+            }
+            j1 += 1;
+        }
+
+        self.progress_string = String::from("Soiling..");
+        //this.progressRenderer.progressStage("Soiling..");
+        aint1 = aint.clone();
+        let j2: i32 = self.x_size;
+        let mut k2: i32 = self.z_size;
+
+        j1 = self.y_size;
+        let perlinnoise1: PerlinNoise = PerlinNoise::new(self.rand, 8);
+
+        let mut l2: f64;
+        let mut i3: f64;
+
+        l = 0;
+        while l < j2 {
+            //progress(l * 100 / (xSize - 1));
+            self.progress_percent = l * 100 / (self.x_size - 1);
+            //self.postMessage(progress);
+
+            i1 = 0;
+            while i1 < k2 {
+                l1 = (perlinnoise1.get_value( l as f64, i1 as f64) / 24.0) - 4.0;
+                i2 = aint1[(l + i1 * j2) as usize] + j1 as f64 / 2.0;
+                l2 = i2 + l1;
+                aint1[(l + i1 * j2) as usize] = f64::max(i2, l2);
+
+                i3 = 0.0;
+                while (i3 as i32) < j1 {
+                    let j3: i32 = (i3 as i32 * self.z_size + i1) * self.x_size + l;
+                    let mut k3: u8 = 0;
+
+                    if i3 <= i2 {
+                        k3 = 3;//Tile.dirt.id;
+                    }
+
+                    if i3 <= l2 {
+                        k3 = 2;//Tile.rock.id;
+                    }
+
+                    self.tiles[j3 as usize] = k3;
+                    i3 += 1.0;
+                }
+                i1 += 1;
+            }
+            l += 1;
+        }
+
+        self.progress_string = String::from("Carving..");
+        //this.progressRenderer.progressStage("Carving..");
+
+        k2 = self.x_size;
+        j1 = self.z_size;
+        k1 = self.y_size;
+        l = k2 * j1 * k1 / 256 / 64;
+
+        i1 = 0;
+        while i1 < l {
+            //progress(i1 * 100 / (l - 1) / 4);
+            self.progress_percent = i1 * 100 / (l - 1) / 4;
+            //self.postMessage(progress);
+
+            let mut f1: f64 = self.random.nextFloat() * k2 as f64;
+            let mut f2: f64 = self.random.nextFloat() * k1 as f64;
+            let mut f3: f64 = self.random.nextFloat() * j1 as f64;
+
+            i3 = (self.random.nextFloat() + self.random.nextFloat()) * 75.0;
+            let mut f4: f64 = self.random.nextFloat() * 3.141592653589793 * 2.0;
+            let mut f5: f64 = 0.0;
+            let mut f6: f64 = self.random.nextFloat() * 3.141592653589793 * 2.0;
+            let mut f7: f64 = 0.0;
+
+            let mut l3: f64 = 0.0;
+            while l3 < i3 {
+                f1 = f1 + f64::sin(f4) * f64::cos(f6);
+                f3 = f3 + f64::cos(f4) * f64::cos(f6);
+                f2 = f2 + f64::sin(f6);
+                f4 += f5 * 0.2;
+                f5 *= 0.9;
+                f5 = f5 + (self.random.nextFloat() - self.random.nextFloat());
+                f6 = (f6 + f7 * 0.5) * 0.5;
+                f7 *= 0.9;
+                f7 = f7 + (self.random.nextFloat() - self.random.nextFloat());
+                if self.random.nextFloat() >= 0.3 {
+                    let f8: f64 = f1 + self.random.nextFloat() * 4.0 - 2.0;
+                    let f9: f64 = f2 + self.random.nextFloat() * 4.0 - 2.0;
+                    let f10: f64 = f3 + self.random.nextFloat() * 4.0 - 2.0;
+                    let f11: f64 = f64::sin( l3 * 3.141592653589793 / i3) * 2.5 + 1.0;
+
+                    let mut i4: i32 = (f8 - f11) as i32; //parseInt()
+                    while i4 <= (f8 + f11) as i32 { //parseInt()
+                        let mut j4: i32 = (f9 - f11) as i32; //parseInt()
+                        while j4 <= (f9 + f11) as i32 { //parseInt()
+                            let mut k4: f64 = f10 - f11;
+                            while k4 <= (f10 + f11) {
+                                let f12: f64 = i4 as f64 - f8;
+                                let f13: f64 = j4 as f64 - f9;
+                                let f14: f64 = k4 - f10;
+
+                                if f12 * f12 + f13 * f13 * 2.0 + f14 * f14 < f11 * f11 && i4 >= 1 && j4 >= 1 && k4 >= 1.0 && i4 < self.x_size - 1 && j4 < self.y_size - 1 && k4 < self.z_size as f64 - 1.0 {
+                                    let l4: i32 = (((j4 as f64 * self.z_size as f64 + k4) * self.x_size as f64) + i4 as f64) as i32;
+
+                                    //if (tiles[l4] == Tile.rock.id) {
+                                    if self.tiles[l4 as usize] == 2 {
+                                        self.tiles[l4 as usize] = 0;
+                                    }
+                                }
+                                k4 += 1.0;
+                            }
+                            j4 += 1;
+                        }
+                        i4 += 1;
+                    }
+                }
+                l3 += 1.0;
+            }
+            i1 += 1;
+        }
+
+        self.place_ore(20, 90, 1, 4); // coal
+        self.place_ore(19, 70, 2, 4); // iron
+        self.place_ore(18, 50, 3, 4); // gold
+
+        self.progress_string = String::from("Watering..");
+        //this.progressRenderer.progressStage("Watering..");
+        //long i5 = System.nanoTime();
+        let _i5: f64 = self.random.nextFloat();//Math.random();
+        let mut j5: u8 = 0;
+
+        l = 7;//Tile.calmWater.id;
+        //this.progress(0);
+
+        // hack for floodfill to work...
+        let mut extray = 64-35;
+        if self.x_size >= 256 {extray = 128-36};
+        if self.x_size >= 512 {extray = 256-37};
+
+        //console.log(ySize / 2 - 1)
+
+        i1 = 0;
+        while i1 < self.x_size {
+            j5 = j5 + self.flood_fill(i1, self.y_size / 2 - 1 + extray, 0, 0, l as u8) + self.flood_fill(i1, self.y_size / 2 - 1, self.z_size - 1 + extray, 0, l as u8);
+            i1 += 1;
+        }
+
+        i1 = 0;
+        while i1 < self.z_size {
+            j5 = j5 + self.flood_fill(0, self.y_size / 2 - 1 + extray, i1, 0, l as u8) + self.flood_fill(self.x_size - 1, self.y_size / 2 - 1 + extray, i1, 0, l as u8);
+            i1 += 1;
+        }
+
+
+        i1 = self.x_size * self.z_size / 200;
+
+        l1 = 0.0;
+        while l1 < i1 as f64 {
+            if l1 % 100.0 == 0.0 {
+            	self.progress_percent = l1 as i32 * 100 / (i1 - 1);
+                //self.postMessage(progress);
+            }
+
+            let i4: i32 = self.random.nextInt(self.x_size); //i2
+            let l4: i32 = self.y_size / 2 - 1 - self.random.nextInt(3) + extray; //l2
+            let i6: i32 = self.random.nextInt(self.z_size); //i3
+            if self.tiles[((l4 * self.z_size + i6) * self.x_size + i4) as usize] == 0 {
+                j5 += self.flood_fill(i4, l4, i6, 0, l as u8);
+            }
+            l1 += 1.0;
+        }
+            	
+        self.progress_percent = 100;
+        //self.postMessage(progress);
+
+        self.progress_string = String::from("Melting..");
+        //this.progressRenderer.progressStage("Melting..");
+        self.melt();
+        self.progress_string = String::from("Growing..");
+        //this.progressRenderer.progressStage("Growing..");
+        self.grow(aint.clone());
+        self.progress_string = String::from("Planting..");
+        //this.progressRenderer.progressStage("Planting..");
+        self.plant(aint.clone());
+
+        self.progress_tiles = self.tiles.clone();
+
+        //Added line to output the tile map - Added by Sl1mj1m
+        //console.log(progress.tiles);
+        println!("{:?}", self.progress_tiles);
+        
+        self.progress_string = String::from("");
+        //self.postMessage(progress);
+
     }
 }
 
