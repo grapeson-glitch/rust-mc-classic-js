@@ -1,4 +1,5 @@
 use crate::random::Random;
+use std::collections::HashMap;
 
 
 //Creating the Distort struct
@@ -68,26 +69,26 @@ impl PerlinNoise {
 
 #[derive(Clone)]
 pub struct ImprovedNoise {
-    p: Vec<i32>
+    p: HashMap<usize, i32>
 }
 
 impl ImprovedNoise {
     pub fn new (random: f64) -> Self {
-        let mut p: Vec<i32> = Vec::new();
+        let mut p: HashMap<usize, i32> = HashMap::new();
 
         for i in 0..256 {
-            p[i] = i as i32;
+            p.insert(i, i as i32);
         }
 
         for i in 0..256 {
             //var j = random.next_int(256 - i) + i;
             //var j = Math.round( Math.random() * 256-i ) + i;
-            let j: i32 = (random * (256.0 - i as f64)).round() as i32 + i;
-            let tmp: i32 = p[i as usize];
-            p[i as usize] = p[j as usize];
-            p[j as usize] = tmp;
+            let j: i32 = (random * (256.0 - i as f64)).round() as i32 + i as i32;
+            let tmp: i32 = p.get(&i).copied().unwrap_or(0);
+            p.insert(i,p.get(&(j as usize)).copied().unwrap_or(0));
+            p.insert(j as usize,tmp);
 
-            p[(i + 256) as usize] = p[i as usize];
+            p.insert((i + 256) as usize, p.get(&i).copied().unwrap_or(0));
 
         }
 
@@ -127,16 +128,15 @@ impl ImprovedNoise {
         let d5: f64 = self.fade_curve(d4);
         let d6: f64 = self.fade_curve(d3);
         let d7: f64 = self.fade_curve(d2);
-        let mut l: i32 = self.p[i as usize] + j;
-        let i1: i32 = self.p[l as usize] + k;
+        let mut l: i32 = self.p.get(&(i as usize)).copied().unwrap_or(0) + j;
+        let i1: i32 = self.p.get(&(l as usize)).copied().unwrap_or(0) + k;
 
-        l = self.p[(l + 1) as usize] + k;
-        i = self.p[(i + 1) as usize] + j;
-        j = self.p[i as usize] + k;
-        i = self.p[(i + 1) as usize] + k;
+        l = self.p.get(&((l + 1) as usize)).copied().unwrap_or(0) + k;
+        i = self.p.get(&((i + 1) as usize)).copied().unwrap_or(0) + j;
+        j = self.p.get(&(i as usize)).copied().unwrap_or(0) + k;
+        i = self.p.get(&((i + 1) as usize)).copied().unwrap_or(0) + k;
 
-        return self.lerp(d7, self.lerp(d6, self.lerp(d5, self.grad(self.p[i1 as usize], d4, d3, d2), self.grad(self.p[j as usize], d4 - 1.0, d3, d2)), self.lerp(d5, self.grad(self.p[l as usize], d4, d3 - 1.0, d2), self.grad(self.p[i as usize], d4 - 1.0, d3 - 1.0, d2))), self.lerp(d6, self.lerp(d5, self.grad(self.p[(i1 + 1) as usize], d4, d3, d2 - 1.0), self.grad(self.p[(j + 1) as usize], d4 - 1.0, d3, d2 - 1.0)), self.lerp(d5, self.grad(self.p[(l + 1) as usize], d4, d3 - 1.0, d2 - 1.0), self.grad(self.p[(i + 1) as usize], d4 - 1.0, d3 - 1.0, d2 - 1.0))));
-    }
+        return self.lerp(d7, self.lerp(d6, self.lerp(d5, self.grad(self.p.get(&(i1 as usize)).copied().unwrap_or(0), d4, d3, d2), self.grad(self.p.get(&(j as usize)).copied().unwrap_or(0), d4 - 1.0, d3, d2)), self.lerp(d5, self.grad(self.p.get(&(l as usize)).copied().unwrap_or(0), d4, d3 - 1.0, d2), self.grad(self.p.get(&(i as usize)).copied().unwrap_or(0), d4 - 1.0, d3 - 1.0, d2))), self.lerp(d6, self.lerp(d5, self.grad(self.p.get(&((i1 + 1) as usize)).copied().unwrap_or(0), d4, d3, d2 - 1.0), self.grad(self.p.get(&((j + 1) as usize)).copied().unwrap_or(0), d4 - 1.0, d3, d2 - 1.0)), self.lerp(d5, self.grad(self.p.get(&((l + 1) as usize)).copied().unwrap_or(0), d4, d3 - 1.0, d2 - 1.0), self.grad(self.p.get(&((i + 1) as usize)).copied().unwrap_or(0), d4 - 1.0, d3 - 1.0, d2 - 1.0))));    }
 }
 
 
