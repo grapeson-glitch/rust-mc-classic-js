@@ -796,9 +796,9 @@ impl RandomLevel {
         //println!("{:?}", self.progress_tiles);
 
         //Testing tile output
-        for n in 0..self.x_size * self.z_size * self.y_size {
+        /*for n in 0..self.x_size * self.z_size * self.y_size {
             println!("{}:{}",n,self.progress_tiles.get(&(n as usize)).copied().unwrap_or(255));
-        }
+        }*/
         
         self.progress_string = String::from("");
         //self.postMessage(progress);
@@ -806,7 +806,7 @@ impl RandomLevel {
     }
 }
 
-pub fn start_generation (world_size: i32, seed: i32) { //{worldSize: worldSize, seed: props.seed, seedrandom: seedrandom}
+pub fn start_generation (world_size: i32, seed: i32) -> HashMap<usize, u8> { //{worldSize: worldSize, seed: props.seed, seedrandom: seedrandom}
     
     let width: i32 = world_size;
     let depth: i32 = world_size;
@@ -814,4 +814,5 @@ pub fn start_generation (world_size: i32, seed: i32) { //{worldSize: worldSize, 
 
     let mut level = RandomLevel::new(seed, width, depth, height);
     level.create_level();
+    return level.progress_tiles;
 }
