@@ -14,7 +14,7 @@ fn main() {
         if tile != 255 {
             //println!("{}:{}",i,tile);
         } else {
-            println!("ERROR AT {}!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",i);
+            println!("HEY IDIOT - YOU HAVE AN ERROR AT {}!",i);
         }
         
     }
