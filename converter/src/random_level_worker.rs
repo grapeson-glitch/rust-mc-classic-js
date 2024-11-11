@@ -1,7 +1,7 @@
 use crate::random::Random;
 use std::collections::HashMap;
 
-//self.tiles.get(&()).copied().unwrap_or(0)
+//self.fill_queue.get(&()).copied().unwrap_or(0)
 
 
 //Creating the Distort struct
@@ -153,7 +153,7 @@ struct RandomLevel {
     random: Random,
     rand: f64,
     tiles: HashMap<usize, u8>,
-    fill_queue: Vec<i32>
+    fill_queue: HashMap<usize, i32>
 
 }
 
@@ -169,7 +169,7 @@ impl RandomLevel {
         let mut random: Random = Random::new(seed);
         let rand: f64 = random.next_float();
         let tiles: HashMap<usize, u8> = HashMap::new();
-        let fill_queue: Vec<i32> = Vec::new();
+        let fill_queue: HashMap<usize, i32> = HashMap::new();
 
         RandomLevel {
             progress_string,
@@ -426,9 +426,9 @@ impl RandomLevel {
         let x_mask: i32 = self.x_size - 1;
         let mut count: i32 = 1;
 
-        self.fill_queue[0] = ((yc << h_bits) + zc << w_bits) + xc;
+        self.fill_queue.insert(0, ((yc << h_bits) + zc << w_bits) + xc);
 
-        let mut k2: u8 = 0;
+        let mut k2: i32 = 0;
 
         let offset: i32 = self.x_size * self.z_size;
 
@@ -436,7 +436,7 @@ impl RandomLevel {
 
             count -= 1;
 
-            let mut val: i32 = self.fill_queue[count as usize];
+            let mut val: i32 = self.fill_queue.get(&(count as usize)).copied().unwrap_or(0);
 
             let z: i32 = val >> w_bits & z_mask;
             let l2: i32 = val >> w_bits + h_bits;
@@ -469,7 +469,7 @@ impl RandomLevel {
             let mut flag1: bool = false;
             let mut flag2: bool = false;
 
-            k2 += (j3 - i3) as u8;
+            k2 += j3 - i3;
 
             i3 = i3;
 
@@ -485,7 +485,7 @@ impl RandomLevel {
                     if flag3 && !flag {
 
                         count += 1;
-                        self.fill_queue[count as usize] = val - self.x_size;
+                        self.fill_queue.insert(count as usize, val - self.x_size);
 
                     }
 
@@ -500,7 +500,7 @@ impl RandomLevel {
                     if flag3 && !flag1 {
 
                         count += 1;
-                        self.fill_queue[count as usize] = val + self.x_size;
+                        self.fill_queue.insert(count as usize, val + self.x_size);
 
                     }
 
@@ -520,7 +520,7 @@ impl RandomLevel {
                     if flag3 && !flag2 {
 
                         count += 1;
-                        self.fill_queue[count as usize] = val - offset;
+                        self.fill_queue.insert(count as usize, val - offset);
 
                     }
 
@@ -530,7 +530,7 @@ impl RandomLevel {
                 i3 += 1;
             }
         }
-        return k2;
+        return k2 as u8;
     }
 
     pub fn create_level (&mut self) {
@@ -747,13 +747,13 @@ impl RandomLevel {
 
         i1 = 0;
         while i1 < self.x_size {
-            j5 = j5 + self.flood_fill(i1, self.y_size / 2 - 1 + extray, 0, 0, l as u8) + self.flood_fill(i1, self.y_size / 2 - 1, self.z_size - 1 + extray, 0, l as u8);
+            j5 = (j5 as i32 + self.flood_fill(i1, self.y_size / 2 - 1 + extray, 0, 0, l as u8) as i32 + self.flood_fill(i1, self.y_size / 2 - 1, self.z_size - 1 + extray, 0, l as u8) as i32) as u8;
             i1 += 1;
         }
 
         i1 = 0;
         while i1 < self.z_size {
-            j5 = j5 + self.flood_fill(0, self.y_size / 2 - 1 + extray, i1, 0, l as u8) + self.flood_fill(self.x_size - 1, self.y_size / 2 - 1 + extray, i1, 0, l as u8);
+            j5 = (j5 as i32 + self.flood_fill(0, self.y_size / 2 - 1 + extray, i1, 0, l as u8) as i32 + self.flood_fill(self.x_size - 1, self.y_size / 2 - 1 + extray, i1, 0, l as u8) as i32) as u8;
             i1 += 1;
         }
 
@@ -771,7 +771,7 @@ impl RandomLevel {
             let l4: i32 = self.y_size / 2 - 1 - self.random.next_int(3) + extray; //l2
             let i6: i32 = self.random.next_int(self.z_size); //i3
             if self.tiles.get(&(((l4 * self.z_size + i6) * self.x_size + i4) as usize)).copied().unwrap_or(0) == 0 {
-                j5 += self.flood_fill(i4, l4, i6, 0, l as u8);
+                j5 = (j5 as i32 + self.flood_fill(i4, l4, i6, 0, l as u8) as i32) as u8;
             }
             l1 += 1.0;
         }
@@ -793,7 +793,12 @@ impl RandomLevel {
 
         //Added line to output the tile map - Added by Sl1mj1m
         //console.log(progress.tiles);
-        println!("{:?}", self.progress_tiles);
+        //println!("{:?}", self.progress_tiles);
+
+        //Testing tile output
+        for n in 0..self.x_size * self.z_size * self.y_size {
+            println!("{}:{}",n,self.progress_tiles.get(&(n as usize)).copied().unwrap_or(255));
+        }
         
         self.progress_string = String::from("");
         //self.postMessage(progress);
