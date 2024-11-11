@@ -1,6 +1,8 @@
 use crate::random::Random;
 use std::collections::HashMap;
 
+//self.tiles.get(&()).copied().unwrap_or(0)
+
 
 //Creating the Distort struct
 struct Distort {
@@ -144,13 +146,13 @@ struct RandomLevel {
 
     progress_string: String,
     progress_percent: i32,
-    progress_tiles: Vec<u8>, 	
+    progress_tiles: HashMap<usize, u8>, 	
     x_size: i32,
     y_size: i32,
     z_size: i32,
     random: Random,
     rand: f64,
-    tiles: Vec<u8>,
+    tiles: HashMap<usize, u8>,
     fill_queue: Vec<i32>
 
 }
@@ -160,13 +162,13 @@ impl RandomLevel {
     pub fn new (seed: i32, x_size: i32, z_size: i32, mut y_size: i32) -> RandomLevel {
         let progress_string: String = String::from("");
         let progress_percent: i32 = 0;
-        let progress_tiles: Vec<u8> = Vec::new();
+        let progress_tiles: HashMap<usize, u8> = HashMap::new();
 
         y_size = 64;
 
         let mut random: Random = Random::new(seed);
         let rand: f64 = random.next_float();
-        let tiles: Vec<u8> = Vec::new();
+        let tiles: HashMap<usize, u8> = HashMap::new();
         let fill_queue: Vec<i32> = Vec::new();
 
         RandomLevel {
@@ -185,7 +187,7 @@ impl RandomLevel {
     }
 
     //grow
-    pub fn grow (&mut self, aint: Vec<f64>) {
+    pub fn grow (&mut self, aint: HashMap<usize, f64>) {
         let i: i32 = self.x_size;
         let j: i32 = self.z_size;
         let k: i32 = self.y_size;
@@ -202,16 +204,16 @@ impl RandomLevel {
                 let flag1: bool = perlin_noise1.get_value(l as f64, i1 as f64) > 12.0;
                 let j1: i32;
                 //var k1 = parseInt( ((j1 = parseInt(aint[l + i1 * i],10)) * this.zSize + i1) * this.xSize + l, 10);
-                j1 = aint[(l + i1 * i) as usize] as i32;
+                j1 = aint.get(&((l + i1 * i) as usize)).copied().unwrap_or(0.0) as i32;
                 let k1: i32 = ((j1 * self.z_size + i1) * self.x_size + l) as i32;//parseInt()
                 let l1: i32;
 
                 // 7 waterid
                 //if (((l1 = parseInt(this.tiles[((j1 + 1) * this.zSize + i1) * this.xSize + l],10) & 255) == 7) && j1 <= k / 2 - 1 && flag1) {
-                l1 = (self.tiles[(((j1 + 1) * self.z_size + i1) * self.x_size + l) as usize]) as i32 & 255;//parseInt()
+                l1 = (self.tiles.get(&((((j1 + 1) * self.z_size + i1) * self.x_size + l) as usize)).copied().unwrap_or(0)) as i32 & 255;//parseInt()
                 if (l1 == 7) && j1 <= k / 2 - 1 && flag1 {
 
-                    self.tiles[k1 as usize] = 12;//(byte) Tile.gravel.id;
+                    self.tiles.insert(k1 as usize, 12);//(byte) Tile.gravel.id;
                 }
 
                 if l1 == 0 {
@@ -221,7 +223,7 @@ impl RandomLevel {
                         i2 = 11;//Tile.sand.id;
                     }
 
-                    self.tiles[k1 as usize] = i2 as u8;
+                    self.tiles.insert(k1 as usize, i2 as u8);
                 }
             }
         }
@@ -243,7 +245,7 @@ impl RandomLevel {
             let i1: i32 = self.random.next_int(self.y_size / 2 - 4) + extray;
             let j1: i32 = self.random.next_int(self.z_size);
 
-            if self.tiles[((i1 * self.z_size + j1) * self.x_size + l) as usize] == 0 {
+            if self.tiles.get(&(((i1 * self.z_size + j1) * self.x_size + l) as usize)).copied().unwrap_or(0) == 0 {
                 _i += 1;
                 self.flood_fill(l, i1, j1, 0, 17);
 
@@ -252,7 +254,7 @@ impl RandomLevel {
     }
 
     //plant
-    pub fn plant (&mut self, aint: Vec<f64>) {
+    pub fn plant (&mut self, aint: HashMap<usize, f64>) {
         let i: i32 = self.x_size;
         let j: i32 = self.x_size * self.z_size / 4000;
 
@@ -272,7 +274,7 @@ impl RandomLevel {
                     l1 += self.random.next_int(6) - self.random.next_int(6);
 
                     if k1 >= 0 && l1 >= 0 && k1 < self.x_size && l1 < self.z_size {
-                        let j2: f64 = aint[(k1 + l1 * i) as usize] + 1.0;//No idea if this is supposed to be a float or an int...
+                        let j2: f64 = aint.get(&((k1 + l1 * i) as usize)).copied().unwrap_or(0.0) + 1.0;//No idea if this is supposed to be a float or an int...
                         let k2: i32 = self.random.next_int(3) + 4;
                         let mut flag: bool = true;
 
@@ -292,7 +294,7 @@ impl RandomLevel {
                                 j3 = (l1 - b0) as f64;
                                 while j3 <= (l1 + b0) as f64 && flag {
                                     if i3 >= 0.0 && l2 >= 0.0 && j3 >= 0.0 && i3 < self.x_size as f64 && l2 < self.y_size as f64 && j3 < self.z_size as f64 {
-                                        if (self.tiles[((l2 * self.z_size as f64 + j3) * self.x_size as f64 + i3) as usize] & 255) != 0 {
+                                        if (self.tiles.get(&(((l2 * self.z_size as f64 + j3) * self.x_size as f64 + i3) as usize)).copied().unwrap_or(0) & 255) != 0 {
                                             flag = false;
                                         }
                                     } else {
@@ -307,8 +309,8 @@ impl RandomLevel {
 
                         if flag {
                             l2 = (j2 * self.z_size as f64 + l1 as f64) * self.x_size as f64 + k1 as f64;
-                            if (self.tiles[(((j2 - 1.0) * self.z_size as f64 + l1 as f64) * self.x_size as f64 + k1 as f64) as usize] & 255) == 1 && j2 < self.y_size as f64 - k2 as f64 - 1.0 {
-                                self.tiles[(l2 - 1.0 * self.x_size as f64 * self.z_size as f64) as usize] = 3;//(byte) Tile.dirt.id;
+                            if (self.tiles.get(&((((j2 - 1.0) * self.z_size as f64 + l1 as f64) * self.x_size as f64 + k1 as f64) as usize)).copied().unwrap_or(0) & 255) == 1 && j2 < self.y_size as f64 - k2 as f64 - 1.0 {
+                                self.tiles.insert((l2 - 1.0 * self.x_size as f64 * self.z_size as f64) as usize, 3);//(byte) Tile.dirt.id;
 
                                 i3 = j2 - 3.0 + k2 as f64;
                                 while i3 <= j2 + k2 as f64 {
@@ -327,7 +329,7 @@ impl RandomLevel {
                                             let k4: i32 = (j4 - l1) as i32;//parseInt()
 
                                             if i32::abs(i4) != k3 || i32::abs(k4) != k3 || self.random.next_int(2) != 0 && j3 != 0.0 {
-                                                self.tiles[((i3 * self.z_size as f64 + j4 as f64) * self.x_size as f64 + l3 as f64) as usize] = 14;//(byte) Tile.leaves.id;
+                                                self.tiles.insert(((i3 * self.z_size as f64 + j4 as f64) * self.x_size as f64 + l3 as f64) as usize, 14);//(byte) Tile.leaves.id;
                                             }
                                             j4 += 1;
                                         }
@@ -338,7 +340,7 @@ impl RandomLevel {
 
                                 i3 = 0.0;
                                 while i3 < k2 as f64 {
-                                    self.tiles[(l2 + i3 * self.x_size as f64 * self.z_size as f64) as usize] = 13;//(byte) Tile.treeTrunk.id;
+                                    self.tiles.insert((l2 + i3 * self.x_size as f64 * self.z_size as f64) as usize, 13);//(byte) Tile.treeTrunk.id;
                                     i3 += 1.0;
                                 }
                             }
@@ -399,8 +401,8 @@ impl RandomLevel {
                                 let j3: i32 = ((l2 * self.z_size as f64 + i3) * self.x_size as f64 + k2) as i32; //parseInt()
 
                                 //if (this.tiles[j3] == Tile.rock.id) {
-                                if self.tiles[j3 as usize] == 2 {
-                                    self.tiles[j3 as usize] = tile;
+                                if self.tiles.get(&(j3 as usize)).copied().unwrap_or(0) == 2 {
+                                    self.tiles.insert(j3 as usize, tile);
                                 }
                             }
                             i3 += 1.0;
@@ -445,12 +447,12 @@ impl RandomLevel {
             i3 = val & x_mask;
             j3 = i3;
 
-            while i3 > 0 && self.tiles[(val - 1) as usize] == 0 {
+            while i3 > 0 && self.tiles.get(&((val - 1) as usize)).copied().unwrap_or(0) == 0 {
                 i3 -= 1;
                 val -= 1;
             }
 
-            while j3 < self.x_size && self.tiles[(val + j3 - i3) as usize] == 0 {
+            while j3 < self.x_size && self.tiles.get(&((val + j3 - i3) as usize)).copied().unwrap_or(0) == 0 {
                 j3 += 1;
             }
 
@@ -473,12 +475,12 @@ impl RandomLevel {
 
             while i3 < j3 {
 
-                self.tiles[val as usize] = tile;
+                self.tiles.insert(val as usize, tile);
                 let mut flag3: bool;
 
                 if z > 0 {
 
-                    flag3 = self.tiles[(val - self.x_size) as usize] == 0;
+                    flag3 = self.tiles.get(&((val - self.x_size) as usize)).copied().unwrap_or(0) == 0;
 
                     if flag3 && !flag {
 
@@ -493,7 +495,7 @@ impl RandomLevel {
 
                 if z < self.z_size - 1 {
 
-                    flag3 = self.tiles[(val + self.x_size) as usize] == 0;
+                    flag3 = self.tiles.get(&((val + self.x_size) as usize)).copied().unwrap_or(0) == 0;
 
                     if flag3 && !flag1 {
 
@@ -507,11 +509,11 @@ impl RandomLevel {
                 }
 
                 if l2 > 0 {
-                    let b2: u8 = self.tiles[(val - offset) as usize];
+                    let b2: u8 = self.tiles.get(&((val - offset) as usize)).copied().unwrap_or(0);
 
                     //if (( tile == Tile.lava.id || tile == Tile.calmLava.id) && (b2 == Tile.water.id || b2 == Tile.calmWater.id)) {
                     if ( tile == 17) && (b2 == 7) {
-                        self.tiles[(val - offset) as usize] = 2;//Tile.rock.id;
+                        self.tiles.insert((val - offset) as usize, 2);//Tile.rock.id;
                     }
 
                     flag3 = b2 == 0;
@@ -540,7 +542,7 @@ impl RandomLevel {
         let perlinnoise: PerlinNoise = PerlinNoise::new(self.rand, 8);
 
         // 256x256 array of world noise
-        let mut aint: Vec<f64> = Vec::new();
+        let mut aint: HashMap<usize, f64> = HashMap::new();
 
         let f: f64 = 1.3;
 
@@ -568,14 +570,14 @@ impl RandomLevel {
                     d2 *= 0.8;
                 }
 
-                aint[(l + i1 * self.x_size) as usize] = d2;
+                aint.insert((l + i1 * self.x_size) as usize, d2);
                 i1 += 1;
             }
             l += 1;
         }
 
         self.progress_string = String::from("Eroding..");
-        let mut aint1: Vec<f64> = aint.clone();
+        let mut aint1: HashMap<usize, f64> = aint.clone();
 
         distort1 = Distort::new(PerlinNoise::new(self.rand, 8), PerlinNoise::new(self.rand, 8));
         let distort2: Distort = Distort::new(PerlinNoise::new(self.rand, 8), PerlinNoise::new(self.rand, 8));
@@ -597,8 +599,8 @@ impl RandomLevel {
 
                 l1 = if distort2.get_value( (j1 << 1) as f64, (k1 << 1) as f64) > 0.0 {1.0} else {0.0};
                 if d3 > 2.0 {
-                    i2 = ((((aint1[(j1 + k1 * self.x_size) as usize] - l1) / 2.0) as i32) << 1) as f64 + l1; //What on earth were you doing trying to bit shift a double???
-                    aint1[(j1 + k1 * self.x_size) as usize] = i2;
+                    i2 = (((((aint1.get(&((j1 + k1 * self.x_size) as usize)).copied().unwrap_or(0.0)) - l1) / 2.0) as i32) << 1) as f64 + l1; //What on earth were you doing trying to bit shift a double???
+                    aint1.insert((j1 + k1 * self.x_size) as usize, i2);
                 }
                 k1 += 1;
             }
@@ -626,9 +628,9 @@ impl RandomLevel {
             i1 = 0;
             while i1 < k2 {
                 l1 = (perlinnoise1.get_value( l as f64, i1 as f64) / 24.0) - 4.0;
-                i2 = aint1[(l + i1 * j2) as usize] + j1 as f64 / 2.0;
+                i2 = aint1.get(&((l + i1 * j2) as usize)).copied().unwrap_or(0.0) + j1 as f64 / 2.0;
                 l2 = i2 + l1;
-                aint1[(l + i1 * j2) as usize] = f64::max(i2, l2);
+                aint1.insert((l + i1 * j2) as usize, f64::max(i2, l2));
 
                 i3 = 0.0;
                 while (i3 as i32) < j1 {
@@ -643,7 +645,7 @@ impl RandomLevel {
                         k3 = 2;//Tile.rock.id;
                     }
 
-                    self.tiles[j3 as usize] = k3;
+                    self.tiles.insert(j3 as usize, k3);
                     i3 += 1.0;
                 }
                 i1 += 1;
@@ -706,8 +708,9 @@ impl RandomLevel {
                                     let l4: i32 = (((j4 as f64 * self.z_size as f64 + k4) * self.x_size as f64) + i4 as f64) as i32;//parseInt()
 
                                     //if (tiles[l4] == Tile.rock.id) {
-                                    if self.tiles[l4 as usize] == 2 {
-                                        self.tiles[l4 as usize] = 0;
+                                    if self.tiles.get(&(l4 as usize)).copied().unwrap_or(0) == 2 {
+                                        //self.tiles.get(&()).copied().unwrap_or(0)
+                                        self.tiles.insert(l4 as usize, 0);
                                     }
                                 }
                                 k4 += 1.0;
@@ -767,7 +770,7 @@ impl RandomLevel {
             let i4: i32 = self.random.next_int(self.x_size); //i2
             let l4: i32 = self.y_size / 2 - 1 - self.random.next_int(3) + extray; //l2
             let i6: i32 = self.random.next_int(self.z_size); //i3
-            if self.tiles[((l4 * self.z_size + i6) * self.x_size + i4) as usize] == 0 {
+            if self.tiles.get(&(((l4 * self.z_size + i6) * self.x_size + i4) as usize)).copied().unwrap_or(0) == 0 {
                 j5 += self.flood_fill(i4, l4, i6, 0, l as u8);
             }
             l1 += 1.0;
