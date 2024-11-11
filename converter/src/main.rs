@@ -5,7 +5,7 @@ use std::fs;
 
 fn main() {
     println!("Starting World Generation");
-    let seed: i32 = 47;
+    let seed: i64 = 83043704217428;
     let world_size: i32 = 128;
     let level: HashMap<usize, u8> = random_level_worker::start_generation(world_size, seed);
 
@@ -23,7 +23,7 @@ fn main() {
     format_saved_game(seed, level, world_size, 1);
 }
 
-pub fn format_saved_game (seed: i32, level: HashMap<usize, u8>, world_size: i32, version: u8) {
+pub fn format_saved_game (seed: i64, level: HashMap<usize, u8>, world_size: i32, version: u8) {
 
     let loc_open: String = String::from(r#"localStorage.setItem("SavedGame", `"#);
     let loc_close: String = String::from(r#"`)"#);

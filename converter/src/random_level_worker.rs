@@ -159,7 +159,7 @@ struct RandomLevel {
 
 impl RandomLevel {
 
-    pub fn new (seed: i32, x_size: i32, z_size: i32, mut y_size: i32) -> RandomLevel {
+    pub fn new (seed: i64, x_size: i32, z_size: i32, mut y_size: i32) -> RandomLevel {
         let progress_string: String = String::from("");
         let progress_percent: i32 = 0;
         let progress_tiles: HashMap<usize, u8> = HashMap::new();
@@ -806,7 +806,7 @@ impl RandomLevel {
     }
 }
 
-pub fn start_generation (world_size: i32, seed: i32) -> HashMap<usize, u8> { //{worldSize: worldSize, seed: props.seed, seedrandom: seedrandom}
+pub fn start_generation (world_size: i32, seed: i64) -> HashMap<usize, u8> { //{worldSize: worldSize, seed: props.seed, seedrandom: seedrandom}
     
     let width: i32 = world_size;
     let depth: i32 = world_size;

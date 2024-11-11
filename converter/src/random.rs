@@ -1,9 +1,9 @@
 pub struct Random {
-    pub rand: i32
+    pub rand: i64
 }
 
 impl Random {
-    pub fn new (mut seed: i32) -> Self {
+    pub fn new (mut seed: i64) -> Self {
         seed %= 2147483647;
         if seed <= 0 {seed += 2147483646;}
         Random {
@@ -14,8 +14,8 @@ impl Random {
     /**
     * Returns a pseudo-random value between 1 and 2^32 - 2.
     */
-    pub fn next (&mut self) -> i32 {
-        self.rand = (self.rand as u128 * 16807 as u128 % 2147483647 as u128) as i32;
+    pub fn next (&mut self) -> i64 {
+        self.rand = self.rand * 16807 % 2147483647;
         return self.rand;
     }
 
