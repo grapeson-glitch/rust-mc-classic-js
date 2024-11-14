@@ -1,8 +1,9 @@
 use crate::random::Random;
 use std::collections::HashMap;
+use js_sys;
 
-//self.fill_queue.get(&()).copied().unwrap_or(0)
-
+use std::fs::OpenOptions; //debug code
+use std::io::prelude::*; //debug code
 
 //Creating the Distort struct
 struct Distort {
@@ -83,8 +84,6 @@ impl ImprovedNoise {
         }
 
         for i in 0..256 {
-            //var j = random.next_int(256 - i) + i;
-            //var j = Math.round( Math.random() * 256-i ) + i;
             let j: i32 = (random * (256.0 - i as f64)).round() as i32 + i as i32;
             let tmp: i32 = p.get(&i).copied().unwrap_or(0);
             p.insert(i,p.get(&(j as usize)).copied().unwrap_or(0));
@@ -138,7 +137,8 @@ impl ImprovedNoise {
         j = self.p.get(&(i as usize)).copied().unwrap_or(0) + k;
         i = self.p.get(&((i + 1) as usize)).copied().unwrap_or(0) + k;
 
-        return self.lerp(d7, self.lerp(d6, self.lerp(d5, self.grad(self.p.get(&(i1 as usize)).copied().unwrap_or(0), d4, d3, d2), self.grad(self.p.get(&(j as usize)).copied().unwrap_or(0), d4 - 1.0, d3, d2)), self.lerp(d5, self.grad(self.p.get(&(l as usize)).copied().unwrap_or(0), d4, d3 - 1.0, d2), self.grad(self.p.get(&(i as usize)).copied().unwrap_or(0), d4 - 1.0, d3 - 1.0, d2))), self.lerp(d6, self.lerp(d5, self.grad(self.p.get(&((i1 + 1) as usize)).copied().unwrap_or(0), d4, d3, d2 - 1.0), self.grad(self.p.get(&((j + 1) as usize)).copied().unwrap_or(0), d4 - 1.0, d3, d2 - 1.0)), self.lerp(d5, self.grad(self.p.get(&((l + 1) as usize)).copied().unwrap_or(0), d4, d3 - 1.0, d2 - 1.0), self.grad(self.p.get(&((i + 1) as usize)).copied().unwrap_or(0), d4 - 1.0, d3 - 1.0, d2 - 1.0))));    }
+        return self.lerp(d7, self.lerp(d6, self.lerp(d5, self.grad(self.p.get(&(i1 as usize)).copied().unwrap_or(0), d4, d3, d2), self.grad(self.p.get(&(j as usize)).copied().unwrap_or(0), d4 - 1.0, d3, d2)), self.lerp(d5, self.grad(self.p.get(&(l as usize)).copied().unwrap_or(0), d4, d3 - 1.0, d2), self.grad(self.p.get(&(i as usize)).copied().unwrap_or(0), d4 - 1.0, d3 - 1.0, d2))), self.lerp(d6, self.lerp(d5, self.grad(self.p.get(&((i1 + 1) as usize)).copied().unwrap_or(0), d4, d3, d2 - 1.0), self.grad(self.p.get(&((j + 1) as usize)).copied().unwrap_or(0), d4 - 1.0, d3, d2 - 1.0)), self.lerp(d5, self.grad(self.p.get(&((l + 1) as usize)).copied().unwrap_or(0), d4, d3 - 1.0, d2 - 1.0), self.grad(self.p.get(&((i + 1) as usize)).copied().unwrap_or(0), d4 - 1.0, d3 - 1.0, d2 - 1.0)))); 
+    }
 }
 
 
@@ -214,6 +214,7 @@ impl RandomLevel {
                 if (l1 == 7) && j1 <= k / 2 - 1 && flag1 {
 
                     self.tiles.insert(k1 as usize, 12);//(byte) Tile.gravel.id;
+                    //println!("{}", k1); //debug
                 }
 
                 if l1 == 0 {
@@ -351,24 +352,29 @@ impl RandomLevel {
         }
     }
 
-    pub fn place_ore (&mut self, tile: u8, j: i32, k: i32, mut l: i32) {
-        l = self.x_size;
-        let i1: i32 = self.z_size;
-        let j1: i32 = self.y_size;
-        let k1: i32 = l * i1 * j1 / 256 / 64 * j / 100;
+    pub fn place_ore (&mut self, tile: u8, j: f64, k: f64, mut l: f64) {
+        l = self.x_size as f64;
+        let i1: f64 = self.z_size as f64;
+        let j1: f64 = self.y_size as f64;
+        let k1: f64 = l * i1 * j1 / 256.0 / 64.0 * j / 100.0;
 
-        for l1 in 0..k1 {
-            self.progress_percent = l1 * 100 / (k1 - 1) / 4 + k * 100 / 4;
+        println!("tile: {} j: {} k: {} l: {} i1: {} j1: {} k1: {}", tile, j, k, l, i1, j1, k1);
+
+        let mut l1 = 0.0;
+        while l1 < k1 {
+            self.progress_percent = (l1 * 100.0 / (k1 - 1.0) / 4.0 + k * 100.0 / 4.0) as i32;
             //self.postMessage(progress);
 
-            let mut f: f64 = self.random.next_float() * l as f64;
-            let mut f1: f64 = self.random.next_float() * j1 as f64;
-            let mut f2: f64 = self.random.next_float() * i1 as f64;
-            let i2: i32 = ((self.random.next_float() + self.random.next_float()) * 75.0 * j as f64 / 100.0) as i32; //parseInt()
+            let mut f: f64 = self.random.next_float() * l;
+            let mut f1: f64 = self.random.next_float() * j1;
+            let mut f2: f64 = self.random.next_float() * i1;
+            let i2: i32 = ((self.random.next_float() + self.random.next_float()) * 75.0 * j / 100.0) as i32; //parseInt()
             let mut f3: f64 = self.random.next_float() * 3.141592653589793 * 2.0;
             let mut f4: f64 = 0.0;
             let mut f5: f64 = self.random.next_float() * 3.141592653589793 * 2.0;
             let mut f6: f64 = 0.0;
+
+            //println!("tile: {} f: {} f1: {} f2: {} i2: {} f3: {} f4: {} f5: {} f6: {}", tile, f, f1, f2, i2, f3, f4, f5, f6);
 
             for j2 in 0..i2 {
                 f =  f + f64::sin(f3) * f64::cos(f5);
@@ -380,7 +386,19 @@ impl RandomLevel {
                 f5 = (f5 + f6 * 0.5) * 0.5;
                 f6 *= 0.9;
                 f6 = f6 + (self.random.next_float() - self.random.next_float());
-                let f7: f64 = f64::sin(j2 as f64 * 3.141592653589793 / i2 as f64) * j as f64 / 100.0 + 1.0;
+                let f7: f64 = f64::sin(j2 as f64 * 3.141592653589793 / i2 as f64) * j / 100.0 + 1.0;
+
+                let mut debug = OpenOptions::new()
+                .append(true)
+                .open("../debug.txt")
+                .unwrap();
+                //writeln!(debug, "[");
+                /* DEBUG LOOP FOR TILE CHECK */
+                //for n in 0..(self.x_size * self.z_size * self.y_size) {
+                            //writeln!(debug, "   {},", self.tiles.get(&(n as usize)).copied().unwrap_or(255));
+                //}
+                writeln!(debug, "tile: {} f: {} f1: {} f2: {} f3: {} f4: {} f5: {} f6: {} f7: {}", tile, f, f1, f2, f3, f4, f5, f6, f7);
+                //println!("tile: {} f: {} f1: {} f2: {} f3: {} f4: {} f5: {} f6: {} f7: {}", tile, f, f1, f2, f3, f4, f5, f6, f7);
 
                 let mut k2:f64  = (f - f7).round();
 
@@ -412,10 +430,12 @@ impl RandomLevel {
                     k2 += 1.0;
                 }
             }
+            l1 += 1.0;
         }
     }
 
-    pub fn flood_fill (&mut self, xc: i32, yc: i32, zc: i32, _unused: u8, tile: u8) -> u8 {
+    pub fn flood_fill (&mut self, xc: i32, yc: i32, zc: i32, _unused: u8, tile: u8) -> i32 {
+
         let mut w_bits: i32 = 1;
         let mut h_bits: i32 = 1;
 
@@ -447,12 +467,12 @@ impl RandomLevel {
             i3 = val & x_mask;
             j3 = i3;
 
-            while i3 > 0 && self.tiles.get(&((val - 1) as usize)).copied().unwrap_or(0) == 0 {
+            while i3 > 0 && self.tiles.get(&((val - 1) as usize)).copied().unwrap_or(255) == 0 {
                 i3 -= 1;
-                val -= 1;
+                val -= 1; 
             }
 
-            while j3 < self.x_size && self.tiles.get(&((val + j3 - i3) as usize)).copied().unwrap_or(0) == 0 {
+            while j3 < self.x_size && self.tiles.get(&((val + j3 - i3) as usize)).copied().unwrap_or(255) == 0 {
                 j3 += 1;
             }
 
@@ -469,7 +489,7 @@ impl RandomLevel {
             let mut flag1: bool = false;
             let mut flag2: bool = false;
 
-            k2 += j3 - i3;
+            k2 += (j3 - i3);
 
             i3 = i3;
 
@@ -480,12 +500,12 @@ impl RandomLevel {
 
                 if z > 0 {
 
-                    flag3 = self.tiles.get(&((val - self.x_size) as usize)).copied().unwrap_or(0) == 0;
+                    flag3 = self.tiles.get(&((val - self.x_size) as usize)).copied().unwrap_or(255) == 0;
 
                     if flag3 && !flag {
 
-                        count += 1;
                         self.fill_queue.insert(count as usize, val - self.x_size);
+                        count += 1; 
 
                     }
 
@@ -495,12 +515,12 @@ impl RandomLevel {
 
                 if z < self.z_size - 1 {
 
-                    flag3 = self.tiles.get(&((val + self.x_size) as usize)).copied().unwrap_or(0) == 0;
+                    flag3 = self.tiles.get(&((val + self.x_size) as usize)).copied().unwrap_or(255) == 0;
 
                     if flag3 && !flag1 {
 
-                        count += 1;
                         self.fill_queue.insert(count as usize, val + self.x_size);
+                        count += 1; //MOVED ON DEBUG
 
                     }
 
@@ -509,7 +529,7 @@ impl RandomLevel {
                 }
 
                 if l2 > 0 {
-                    let b2: u8 = self.tiles.get(&((val - offset) as usize)).copied().unwrap_or(0);
+                    let b2: u8 = self.tiles.get(&((val - offset) as usize)).copied().unwrap_or(255);
 
                     //if (( tile == Tile.lava.id || tile == Tile.calmLava.id) && (b2 == Tile.water.id || b2 == Tile.calmWater.id)) {
                     if ( tile == 17) && (b2 == 7) {
@@ -519,8 +539,8 @@ impl RandomLevel {
                     flag3 = b2 == 0;
                     if flag3 && !flag2 {
 
-                        count += 1;
                         self.fill_queue.insert(count as usize, val - offset);
+                        count += 1; 
 
                     }
 
@@ -530,7 +550,8 @@ impl RandomLevel {
                 i3 += 1;
             }
         }
-        return k2 as u8;
+
+        return k2;
     }
 
     pub fn create_level (&mut self) {
@@ -574,7 +595,7 @@ impl RandomLevel {
                 i1 += 1;
             }
             l += 1;
-        }
+        } //So far so good, checks match between rust and js
 
         self.progress_string = String::from("Eroding..");
         let mut aint1: HashMap<usize, f64> = aint.clone();
@@ -600,16 +621,19 @@ impl RandomLevel {
                 l1 = if distort2.get_value( (j1 << 1) as f64, (k1 << 1) as f64) > 0.0 {1.0} else {0.0};
                 if d3 > 2.0 {
                     i2 = (((((aint1.get(&((j1 + k1 * self.x_size) as usize)).copied().unwrap_or(0.0)) - l1) / 2.0) as i32) << 1) as f64 + l1; //What on earth were you doing trying to bit shift a double???
+
                     aint1.insert((j1 + k1 * self.x_size) as usize, i2);
                 }
                 k1 += 1;
             }
             j1 += 1;
-        }
+        } //So far so good, checks against js passed
 
         self.progress_string = String::from("Soiling..");
         //this.progressRenderer.progressStage("Soiling..");
-        aint1 = aint.clone();
+
+        //aint1 = aint.clone(); -> POTENTIALLY UNCOMMENT THIS IN THE FUTURE!!
+
         let j2: i32 = self.x_size;
         let mut k2: i32 = self.z_size;
 
@@ -628,8 +652,9 @@ impl RandomLevel {
             i1 = 0;
             while i1 < k2 {
                 l1 = (perlinnoise1.get_value( l as f64, i1 as f64) / 24.0) - 4.0;
-                i2 = aint1.get(&((l + i1 * j2) as usize)).copied().unwrap_or(0.0) + j1 as f64 / 2.0;
+                i2 = aint1.get(&((l + i1 * j2) as usize)).copied().unwrap_or(0.0) + j1 as f64 / 2.0; //Int conversion is broken
                 l2 = i2 + l1;
+                
                 aint1.insert((l + i1 * j2) as usize, f64::max(i2, l2));
 
                 i3 = 0.0;
@@ -651,7 +676,7 @@ impl RandomLevel {
                 i1 += 1;
             }
             l += 1;
-        }
+        }  //So far so good, debugged this section - all tiles added up to this point match the js
 
         self.progress_string = String::from("Carving..");
         //this.progressRenderer.progressStage("Carving..");
@@ -709,7 +734,6 @@ impl RandomLevel {
 
                                     //if (tiles[l4] == Tile.rock.id) {
                                     if self.tiles.get(&(l4 as usize)).copied().unwrap_or(0) == 2 {
-                                        //self.tiles.get(&()).copied().unwrap_or(0)
                                         self.tiles.insert(l4 as usize, 0);
                                     }
                                 }
@@ -723,17 +747,16 @@ impl RandomLevel {
                 l3 += 1.0;
             }
             i1 += 1;
-        }
-
-        self.place_ore(20, 90, 1, 4); // coal
-        self.place_ore(19, 70, 2, 4); // iron
-        self.place_ore(18, 50, 3, 4); // gold
+        } //So far so good, tile map still matches javascript at this point
+        
+        //self.place_ore(20, 90.0, 1.0, 4.0); // coal - Known Issue that Ore Populates Incorrectly
+        //self.place_ore(19, 70.0, 2.0, 4.0); // iron - Known Issue that Ore Populates Incorrectly
+        //self.place_ore(18, 50.0, 3.0, 4.0); // gold - Known Issue that Ore Populates Incorrectly
 
         self.progress_string = String::from("Watering..");
         //this.progressRenderer.progressStage("Watering..");
-        //long i5 = System.nanoTime();
         let _i5: f64 = self.random.next_float();//Math.random();
-        let mut j5: u8 = 0;
+        let mut j5: i32 = 0;
 
         l = 7;//Tile.calmWater.id;
         //this.progress(0);
@@ -743,25 +766,23 @@ impl RandomLevel {
         if self.x_size >= 256 {extray = 128-36};
         if self.x_size >= 512 {extray = 256-37};
 
-        //console.log(ySize / 2 - 1)
-
         i1 = 0;
         while i1 < self.x_size {
-            j5 = (j5 as i32 + self.flood_fill(i1, self.y_size / 2 - 1 + extray, 0, 0, l as u8) as i32 + self.flood_fill(i1, self.y_size / 2 - 1, self.z_size - 1 + extray, 0, l as u8) as i32) as u8;
+            j5 = j5 + self.flood_fill(i1, self.y_size / 2 - 1 + extray, 0, 0, l as u8) as i32 + self.flood_fill(i1, self.y_size / 2 - 1, self.z_size - 1 + extray, 0, l as u8) as i32;
             i1 += 1;
         }
 
         i1 = 0;
         while i1 < self.z_size {
-            j5 = (j5 as i32 + self.flood_fill(0, self.y_size / 2 - 1 + extray, i1, 0, l as u8) as i32 + self.flood_fill(self.x_size - 1, self.y_size / 2 - 1 + extray, i1, 0, l as u8) as i32) as u8;
+            j5 = j5 + self.flood_fill(0, self.y_size / 2 - 1 + extray, i1, 0, l as u8) as i32 + self.flood_fill(self.x_size - 1, self.y_size / 2 - 1 + extray, i1, 0, l as u8) as i32;
             i1 += 1;
-        }
+        } //Can confirm, flood_fill is accurate, and all code up to this point in create_level is 100% perfect [place_ore excluded]
 
 
         i1 = self.x_size * self.z_size / 200;
 
         l1 = 0.0;
-        while l1 < i1 as f64 {
+        /*while l1 < i1 as f64 {
             if l1 % 100.0 == 0.0 {
             	self.progress_percent = l1 as i32 * 100 / (i1 - 1);
                 //self.postMessage(progress);
@@ -770,24 +791,47 @@ impl RandomLevel {
             let i4: i32 = self.random.next_int(self.x_size); //i2
             let l4: i32 = self.y_size / 2 - 1 - self.random.next_int(3) + extray; //l2
             let i6: i32 = self.random.next_int(self.z_size); //i3
-            if self.tiles.get(&(((l4 * self.z_size + i6) * self.x_size + i4) as usize)).copied().unwrap_or(0) == 0 {
-                j5 = (j5 as i32 + self.flood_fill(i4, l4, i6, 0, l as u8) as i32) as u8;
+            if self.tiles.get(&(((l4 * self.z_size + i6) * self.x_size + i4) as usize)).copied().unwrap_or(255) == 0 {
+                j5 = j5 + self.flood_fill(i4, l4, i6, 0, l as u8) as i32;
             }
             l1 += 1.0;
-        }
+        }*/
             	
         self.progress_percent = 100;
         //self.postMessage(progress);
 
+        /* DEBUG LOOP FOR TILE CHECK */
+        let mut debug = OpenOptions::new()
+        .append(true)
+        .open("../debug.txt")
+        .unwrap();
+        writeln!(debug, "[");
+        for n in 0..(self.x_size * self.z_size * self.y_size) {
+                    writeln!(debug, "{}", self.tiles.get(&(n as usize)).copied().unwrap_or(255));
+        }
+        writeln!(debug, "]");
+        /* DEBUG LOOP FOR TILE CHECK */
+
         self.progress_string = String::from("Melting..");
         //this.progressRenderer.progressStage("Melting..");
-        self.melt();
+        //self.melt(); //TEST
         self.progress_string = String::from("Growing..");
         //this.progressRenderer.progressStage("Growing..");
-        self.grow(aint.clone());
+        //self.grow(aint.clone()); //TEST
         self.progress_string = String::from("Planting..");
         //this.progressRenderer.progressStage("Planting..");
-        self.plant(aint.clone());
+       // self.plant(aint.clone()); //TEST
+
+        /*let mut debug = OpenOptions::new()
+        .append(true)
+        .open("../debug.txt")
+        .unwrap();
+        writeln!(debug, "[");
+        /* DEBUG LOOP FOR TILE CHECK */
+        for n in 0..(self.x_size * self.z_size * self.y_size) {
+                    writeln!(debug, "   {},", self.tiles.get(&(n as usize)).copied().unwrap_or(255));
+        }
+        writeln!(debug, "]");*/
 
         self.progress_tiles = self.tiles.clone();
 
