@@ -53,7 +53,7 @@ pub fn format_saved_game (seed: i64, level: HashMap<usize, u8>, world_size: i32,
             for k in 0..x {
 
                 //Setting tile for changed block
-                t = level.get(&((i + j + k) as usize)).copied().unwrap_or(255);
+                t = level.get(&(((i*z*x) + (j*x) + k) as usize)).copied().unwrap_or(255);
                 //if t != 2 {println!("{}",t)}
                 t2 = t; //Unimplemented code for checking a saved game tilemap against the generation to determine whether 'a' should be 1 or 0
                 //if t == t2 { a = 0 } else { a = 1 }

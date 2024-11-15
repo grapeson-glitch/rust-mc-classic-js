@@ -1,6 +1,5 @@
 use crate::random::Random;
 use std::collections::HashMap;
-use js_sys;
 
 use std::fs::OpenOptions; //debug code
 use std::io::prelude::*; //debug code
@@ -214,7 +213,6 @@ impl RandomLevel {
                 if (l1 == 7) && j1 <= k / 2 - 1 && flag1 {
 
                     self.tiles.insert(k1 as usize, 12);//(byte) Tile.gravel.id;
-                    //println!("{}", k1); //debug
                 }
 
                 if l1 == 0 {
@@ -233,11 +231,12 @@ impl RandomLevel {
     //melt
     pub fn melt (&mut self) {
         let mut _i: i32 = 0;
-        let j: i32 = self.x_size * self.z_size * self.y_size / 10000;
+        let j: f64 = self.x_size as f64 * self.z_size as f64 * self.y_size as f64 / 10000.0;
 
-        for k in 0..j {
-            if k % 100 == 0 {
-                self.progress_percent = k * 100 / (j - 1);
+        let mut k = 0.0;
+        while k < j {
+            if k % 100.0 == 0.0 {
+                self.progress_percent = (k * 100.0 / (j - 1.0)) as i32;
                 //self.postMessage(progress);
             }
 
@@ -251,16 +250,18 @@ impl RandomLevel {
                 self.flood_fill(l, i1, j1, 0, 17);
 
             }
+            k += 1.0;
         }
     }
 
     //plant
     pub fn plant (&mut self, aint: HashMap<usize, f64>) {
         let i: i32 = self.x_size;
-        let j: i32 = self.x_size * self.z_size / 4000;
+        let j: f64 = self.x_size as f64 * self.z_size as f64 / 4000.0;
 
-        for k in 0..j {
-            self.progress_percent = k * 100 / (j - 1);
+        let mut k: f64=0.0;
+        while k < j {
+            self.progress_percent = (k * 100.0 / (j - 1.0)) as i32;
             //self.postMessage(progress);
 
             let l: i32 = self.random.next_int(self.x_size);
@@ -295,7 +296,8 @@ impl RandomLevel {
                                 j3 = (l1 - b0) as f64;
                                 while j3 <= (l1 + b0) as f64 && flag {
                                     if i3 >= 0.0 && l2 >= 0.0 && j3 >= 0.0 && i3 < self.x_size as f64 && l2 < self.y_size as f64 && j3 < self.z_size as f64 {
-                                        if (self.tiles.get(&(((l2 * self.z_size as f64 + j3) * self.x_size as f64 + i3) as usize)).copied().unwrap_or(0) & 255) != 0 {
+                                        
+                                        if (self.tiles.get(&(((l2 * self.z_size as f64 + j3) * self.x_size as f64 + i3) as usize)).copied().unwrap_or(0) & 255) != 0 && (l2 * self.z_size as f64 + j3) * self.x_size as f64 + i3 == ((l2 * self.z_size as f64 + j3) * self.x_size as f64 + i3).floor() {
                                             flag = false;
                                         }
                                     } else {
@@ -304,13 +306,14 @@ impl RandomLevel {
                                     j3 += 1.0;
                                 }
                                 i3 += 1.0; 
+
                             }
                             l2 += 1.0;
                         }
 
                         if flag {
                             l2 = (j2 * self.z_size as f64 + l1 as f64) * self.x_size as f64 + k1 as f64;
-                            if (self.tiles.get(&((((j2 - 1.0) * self.z_size as f64 + l1 as f64) * self.x_size as f64 + k1 as f64) as usize)).copied().unwrap_or(0) & 255) == 1 && j2 < self.y_size as f64 - k2 as f64 - 1.0 {
+                            if (self.tiles.get(&((((j2 - 1.0) * self.z_size as f64 + l1 as f64) * self.x_size as f64 + k1 as f64) as usize)).copied().unwrap_or(0) & 255) == 1 && j2 < self.y_size as f64 - k2 as f64 - 1.0 && (((j2 - 1.0) * self.z_size as f64 + l1 as f64) * self.x_size as f64 + k1 as f64) == (((j2 - 1.0) * self.z_size as f64 + l1 as f64) * self.x_size as f64 + k1 as f64).floor() {
                                 self.tiles.insert((l2 - 1.0 * self.x_size as f64 * self.z_size as f64) as usize, 3);//(byte) Tile.dirt.id;
 
                                 i3 = j2 - 3.0 + k2 as f64;
@@ -349,6 +352,7 @@ impl RandomLevel {
                     }
                 }
             }
+            k += 1.0;
         }
     }
 
@@ -652,10 +656,10 @@ impl RandomLevel {
             i1 = 0;
             while i1 < k2 {
                 l1 = (perlinnoise1.get_value( l as f64, i1 as f64) / 24.0) - 4.0;
-                i2 = aint1.get(&((l + i1 * j2) as usize)).copied().unwrap_or(0.0) + j1 as f64 / 2.0; //Int conversion is broken
+                i2 = aint1.get(&((l + i1 * j2) as usize)).copied().unwrap_or(0.0) + j1 as f64 / 2.0;
                 l2 = i2 + l1;
                 
-                aint1.insert((l + i1 * j2) as usize, f64::max(i2, l2));
+                aint.insert((l + i1 * j2) as usize, f64::max(i2, l2));
 
                 i3 = 0.0;
                 while (i3 as i32) < j1 {
@@ -676,7 +680,7 @@ impl RandomLevel {
                 i1 += 1;
             }
             l += 1;
-        }  //So far so good, debugged this section - all tiles added up to this point match the js
+        } 
 
         self.progress_string = String::from("Carving..");
         //this.progressRenderer.progressStage("Carving..");
@@ -776,15 +780,15 @@ impl RandomLevel {
         while i1 < self.z_size {
             j5 = j5 + self.flood_fill(0, self.y_size / 2 - 1 + extray, i1, 0, l as u8) as i32 + self.flood_fill(self.x_size - 1, self.y_size / 2 - 1 + extray, i1, 0, l as u8) as i32;
             i1 += 1;
-        } //Can confirm, flood_fill is accurate, and all code up to this point in create_level is 100% perfect [place_ore excluded]
+        } 
 
 
-        i1 = self.x_size * self.z_size / 200;
+        let f1: f64 = self.x_size as f64 * self.z_size as f64 / 200.0;
 
         l1 = 0.0;
-        /*while l1 < i1 as f64 {
+        while l1 < f1 {
             if l1 % 100.0 == 0.0 {
-            	self.progress_percent = l1 as i32 * 100 / (i1 - 1);
+            	self.progress_percent = (l1 * 100.0 / (f1 - 1.0)) as i32;
                 //self.postMessage(progress);
             }
 
@@ -795,54 +799,34 @@ impl RandomLevel {
                 j5 = j5 + self.flood_fill(i4, l4, i6, 0, l as u8) as i32;
             }
             l1 += 1.0;
-        }*/
+        }
             	
         self.progress_percent = 100;
         //self.postMessage(progress);
 
-        /* DEBUG LOOP FOR TILE CHECK */
-        let mut debug = OpenOptions::new()
-        .append(true)
-        .open("../debug.txt")
-        .unwrap();
-        writeln!(debug, "[");
-        for n in 0..(self.x_size * self.z_size * self.y_size) {
-                    writeln!(debug, "{}", self.tiles.get(&(n as usize)).copied().unwrap_or(255));
-        }
-        writeln!(debug, "]");
-        /* DEBUG LOOP FOR TILE CHECK */
-
         self.progress_string = String::from("Melting..");
         //this.progressRenderer.progressStage("Melting..");
-        //self.melt(); //TEST
+        self.melt();
         self.progress_string = String::from("Growing..");
         //this.progressRenderer.progressStage("Growing..");
-        //self.grow(aint.clone()); //TEST
+        self.grow(aint.clone());
         self.progress_string = String::from("Planting..");
         //this.progressRenderer.progressStage("Planting..");
-       // self.plant(aint.clone()); //TEST
+        self.plant(aint.clone());
 
-        /*let mut debug = OpenOptions::new()
-        .append(true)
-        .open("../debug.txt")
-        .unwrap();
-        writeln!(debug, "[");
-        /* DEBUG LOOP FOR TILE CHECK */
-        for n in 0..(self.x_size * self.z_size * self.y_size) {
-                    writeln!(debug, "   {},", self.tiles.get(&(n as usize)).copied().unwrap_or(255));
-        }
-        writeln!(debug, "]");*/
+               /* DEBUG LOOP FOR TILE CHECK
+               let mut debug = OpenOptions::new()
+               .append(true)
+               .open("../debug.txt")
+               .unwrap();
+               writeln!(debug, "[");
+               for n in 0..(self.x_size * self.z_size * self.y_size) {
+                           writeln!(debug, "{}", self.tiles.get(&(n as usize)).copied().unwrap_or(255));
+               }
+               writeln!(debug, "]");
+               DEBUG LOOP FOR TILE CHECK */
 
         self.progress_tiles = self.tiles.clone();
-
-        //Added line to output the tile map - Added by Sl1mj1m
-        //console.log(progress.tiles);
-        //println!("{:?}", self.progress_tiles);
-
-        //Testing tile output
-        /*for n in 0..self.x_size * self.z_size * self.y_size {
-            println!("{}:{}",n,self.progress_tiles.get(&(n as usize)).copied().unwrap_or(255));
-        }*/
         
         self.progress_string = String::from("");
         //self.postMessage(progress);
