@@ -5,21 +5,10 @@ use std::collections::HashMap;
 use std::fs;
 
 fn main() {
-    println!("Starting World Generation");
+    println!("Starting World Generation!");
     let seed: i64 = 22407532278926;
     let world_size: i32 = 128;
     let level: HashMap<usize, u8> = random_level_worker::start_generation(world_size, seed);
-
-    //Debug code for finding missing blocks in the level
-    for i in 0..world_size * world_size * 64 {
-        let tile: u8 = level.get(&(i as usize)).copied().unwrap_or(255);
-        if tile != 255 {
-            //println!("{}:{}",i,tile);
-        } else {
-            println!("HEY IDIOT - YOU HAVE AN ERROR AT {}!",i);
-        }
-        
-    }
 
     format_saved_game(seed, level, world_size, 1);
 }
@@ -80,5 +69,4 @@ pub fn format_saved_game (seed: i64, level: HashMap<usize, u8>, world_size: i32,
     output += "}"; //Closing json object
     fs::write("../localStorage.txt", &format!("{}{}{}",loc_open,output,loc_close)).expect("The dude writing this code is an idiot...");
 
-    //println!("{}",output);
 }
