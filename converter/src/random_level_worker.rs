@@ -1,10 +1,6 @@
 use crate::random::Random;
 use std::collections::HashMap;
 
-use std::fs::OpenOptions; //debug code
-use std::io::prelude::*; //debug code
-
-
 //Creating the Distort struct
 struct Distort {
     source: PerlinNoise,
@@ -114,7 +110,7 @@ impl ImprovedNoise {
 
     pub fn get_value (&self, d0: f64, d1: f64) -> f64 {
 
-        let mut d2: f64 = 0.0;
+        let d2: f64;
         let mut d3: f64 = d1;
         let mut d4: f64 = d0;
         let mut i: i32 = d0.floor() as i32 & 255;
@@ -379,8 +375,6 @@ impl RandomLevel {
             let mut f5: f64 = self.random.next_float() * 3.141592653589793 * 2.0;
             let mut f6: f64 = 0.0;
 
-            //println!("tile: {} f: {} f1: {} f2: {} i2: {} f3: {} f4: {} f5: {} f6: {}", tile, f, f1, f2, i2, f3, f4, f5, f6);
-
             for j2 in 0..i2 {
                 f =  f + f64::sin(f3) * f64::cos(f5);
                 f2 = f2 + f64::cos(f3) * f64::cos(f5);
@@ -392,14 +386,6 @@ impl RandomLevel {
                 f6 *= 0.9;
                 f6 = f6 + (self.random.next_float() - self.random.next_float());
                 let f7: f64 = f64::sin(j2 as f64 * 3.141592653589793 / i2 as f64) * j / 100.0 + 1.0;
-
-                //writeln!(debug, "[");
-                /* DEBUG LOOP FOR TILE CHECK */
-                //for n in 0..(self.x_size * self.z_size * self.y_size) {
-                            //writeln!(debug, "   {},", self.tiles.get(&(n as usize)).copied().unwrap_or(255));
-                //}
-                //writeln!(debug, "tile: {} f: {} f1: {} f2: {} f3: {} f4: {} f5: {} f6: {} f7: {}", tile, f, f1, f2, f3, f4, f5, f6, f7);
-                //println!("tile: {} f: {} f1: {} f2: {} f3: {} f4: {} f5: {} f6: {} f7: {}", tile, f, f1, f2, f3, f4, f5, f6, f7);
 
                 let mut k2:f64  = (f - f7).round();
 
@@ -490,7 +476,7 @@ impl RandomLevel {
             let mut flag1: bool = false;
             let mut flag2: bool = false;
 
-            k2 += (j3 - i3);
+            k2 += j3 - i3;
 
             i3 = i3;
 
@@ -521,7 +507,7 @@ impl RandomLevel {
                     if flag3 && !flag1 {
 
                         self.fill_queue.insert(count as usize, val + self.x_size);
-                        count += 1; //MOVED ON DEBUG
+                        count += 1;
 
                     }
 
@@ -596,7 +582,7 @@ impl RandomLevel {
                 i1 += 1;
             }
             l += 1;
-        } //So far so good, checks match between rust and js
+        } 
 
         self.progress_string = String::from("Eroding..");
         let mut aint1: HashMap<usize, f64> = aint.clone();
@@ -628,12 +614,10 @@ impl RandomLevel {
                 k1 += 1;
             }
             j1 += 1;
-        } //So far so good, checks against js passed
+        } 
 
         self.progress_string = String::from("Soiling..");
         //this.progressRenderer.progressStage("Soiling..");
-
-        //aint1 = aint.clone(); -> POTENTIALLY UNCOMMENT THIS IN THE FUTURE!!
 
         let j2: i32 = self.x_size;
         let mut k2: i32 = self.z_size;
@@ -748,7 +732,7 @@ impl RandomLevel {
                 l3 += 1.0;
             }
             i1 += 1;
-        } //So far so good, tile map still matches javascript at this point
+        }
         
         self.place_ore(20, 90.0, 1.0, 4.0); // coal - Known Issue that Ore Populates Incorrectly
         self.place_ore(19, 70.0, 2.0, 4.0); // iron - Known Issue that Ore Populates Incorrectly
@@ -810,18 +794,6 @@ impl RandomLevel {
         self.progress_string = String::from("Planting..");
         //this.progressRenderer.progressStage("Planting..");
         self.plant(aint.clone());
-
-               /* DEBUG LOOP FOR TILE CHECK */
-               let mut debug = OpenOptions::new()
-               .append(true)
-               .open("../debug.txt")
-               .unwrap();
-               writeln!(debug, "[");
-               for n in 0..(self.x_size * self.z_size * self.y_size) {
-                           writeln!(debug, "{}", self.tiles.get(&(n as usize)).copied().unwrap_or(255));
-               }
-               writeln!(debug, "]");
-               /* DEBUG LOOP FOR TILE CHECK */
 
         self.progress_tiles = self.tiles.clone();
         
