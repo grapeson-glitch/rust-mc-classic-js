@@ -359,8 +359,6 @@ impl RandomLevel {
         let j1: f64 = self.y_size as f64;
         let k1: f64 = l * i1 * j1 / 256.0 / 64.0 * j / 100.0;
 
-        println!("tile: {} j: {} k: {} l: {} i1: {} j1: {} k1: {}", tile, j, k, l, i1, j1, k1);
-
         let mut l1 = 0.0;
         while l1 < k1 {
             self.progress_percent = (l1 * 100.0 / (k1 - 1.0) / 4.0 + k * 100.0 / 4.0) as i32;

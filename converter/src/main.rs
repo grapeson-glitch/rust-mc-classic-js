@@ -6,7 +6,7 @@ use std::fs;
 
 fn main() {
     println!("Starting World Generation");
-    let seed: i64 = 47;
+    let seed: i64 = 22407532278926;
     let world_size: i32 = 128;
     let level: HashMap<usize, u8> = random_level_worker::start_generation(world_size, seed);
 
