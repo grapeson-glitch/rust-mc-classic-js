@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use std::fs::OpenOptions; //debug code
 use std::io::prelude::*; //debug code
 
+
 //Creating the Distort struct
 struct Distort {
     source: PerlinNoise,
@@ -392,16 +393,12 @@ impl RandomLevel {
                 f6 = f6 + (self.random.next_float() - self.random.next_float());
                 let f7: f64 = f64::sin(j2 as f64 * 3.141592653589793 / i2 as f64) * j / 100.0 + 1.0;
 
-                let mut debug = OpenOptions::new()
-                .append(true)
-                .open("../debug.txt")
-                .unwrap();
                 //writeln!(debug, "[");
                 /* DEBUG LOOP FOR TILE CHECK */
                 //for n in 0..(self.x_size * self.z_size * self.y_size) {
                             //writeln!(debug, "   {},", self.tiles.get(&(n as usize)).copied().unwrap_or(255));
                 //}
-                writeln!(debug, "tile: {} f: {} f1: {} f2: {} f3: {} f4: {} f5: {} f6: {} f7: {}", tile, f, f1, f2, f3, f4, f5, f6, f7);
+                //writeln!(debug, "tile: {} f: {} f1: {} f2: {} f3: {} f4: {} f5: {} f6: {} f7: {}", tile, f, f1, f2, f3, f4, f5, f6, f7);
                 //println!("tile: {} f: {} f1: {} f2: {} f3: {} f4: {} f5: {} f6: {} f7: {}", tile, f, f1, f2, f3, f4, f5, f6, f7);
 
                 let mut k2:f64  = (f - f7).round();
@@ -753,9 +750,9 @@ impl RandomLevel {
             i1 += 1;
         } //So far so good, tile map still matches javascript at this point
         
-        //self.place_ore(20, 90.0, 1.0, 4.0); // coal - Known Issue that Ore Populates Incorrectly
-        //self.place_ore(19, 70.0, 2.0, 4.0); // iron - Known Issue that Ore Populates Incorrectly
-        //self.place_ore(18, 50.0, 3.0, 4.0); // gold - Known Issue that Ore Populates Incorrectly
+        self.place_ore(20, 90.0, 1.0, 4.0); // coal - Known Issue that Ore Populates Incorrectly
+        self.place_ore(19, 70.0, 2.0, 4.0); // iron - Known Issue that Ore Populates Incorrectly
+        self.place_ore(18, 50.0, 3.0, 4.0); // gold - Known Issue that Ore Populates Incorrectly
 
         self.progress_string = String::from("Watering..");
         //this.progressRenderer.progressStage("Watering..");
@@ -814,7 +811,7 @@ impl RandomLevel {
         //this.progressRenderer.progressStage("Planting..");
         self.plant(aint.clone());
 
-               /* DEBUG LOOP FOR TILE CHECK
+               /* DEBUG LOOP FOR TILE CHECK */
                let mut debug = OpenOptions::new()
                .append(true)
                .open("../debug.txt")
@@ -824,7 +821,7 @@ impl RandomLevel {
                            writeln!(debug, "{}", self.tiles.get(&(n as usize)).copied().unwrap_or(255));
                }
                writeln!(debug, "]");
-               DEBUG LOOP FOR TILE CHECK */
+               /* DEBUG LOOP FOR TILE CHECK */
 
         self.progress_tiles = self.tiles.clone();
         

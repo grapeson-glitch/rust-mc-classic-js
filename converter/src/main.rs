@@ -6,7 +6,7 @@ use std::fs;
 
 fn main() {
     println!("Starting World Generation");
-    let seed: i64 = 83043704217428;
+    let seed: i64 = 47;
     let world_size: i32 = 128;
     let level: HashMap<usize, u8> = random_level_worker::start_generation(world_size, seed);
 
@@ -21,7 +21,7 @@ fn main() {
         
     }
 
-    //format_saved_game(seed, level, world_size, 1);
+    format_saved_game(seed, level, world_size, 1);
 }
 
 pub fn format_saved_game (seed: i64, level: HashMap<usize, u8>, world_size: i32, version: u8) {
