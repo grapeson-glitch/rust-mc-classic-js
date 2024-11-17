@@ -22,8 +22,26 @@ mc-classic-js = "0.1.2"
 
 ## Examples
 
-```rust
-pub fn main() {
+There are a few functions that can read in a savedGame object, depending on whether it is stored inside a db file or just reading in a json string.
+To understand the db format, read here.
 
+```rust
+use mc-classic-js;
+
+pub fn main() {
+    //Default path for Firefox localStorage for classic.minecraft.net, profile and exact path will vary based on user
+    let path = String::from(
+        "/AppData/Roaming/Mozilla/Firefox/Profiles/########.default-release/storage/default/https+++classic.minecraft.net/ls/data.sqlite"
+    );
+
+    //read_saved_game reads in only the savedGame for an sqlite db
+    let json_string = read_saved_game(path).unwrap();
+
+    //deserialize_saved_game converts a json string in the savedGame form and turns it into a JSLevel struct
+    //Essentially it converts the json object into a rust object
+    let level: JSLevel = deserialize_saved_game(json_string);
+
+    //Note the JSLevel struct uses camel case, not snake case. This is intentional so the fields match the original json
+    println!("{}",level.worldSeed); 
 }
 ```
