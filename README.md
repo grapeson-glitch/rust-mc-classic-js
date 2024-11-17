@@ -31,11 +31,11 @@ use mc-classic-js;
 pub fn main() {
     //Default path for Firefox localStorage for classic.minecraft.net, profile and exact path will vary based on user
     let path = String::from(
-        "/AppData/Roaming/Mozilla/Firefox/Profiles/########.default-release/storage/default/https+++classic.minecraft.net/ls/data.sqlite"
+        "AppData/Roaming/Mozilla/Firefox/Profiles/########.default-release/storage/default/https+++classic.minecraft.net/ls/data.sqlite"
     );
 
     //read_saved_game reads in only the savedGame for an sqlite db
-    let json_string = read_saved_game(path).unwrap();
+    let json_string: String = read_saved_game(path).unwrap();
 
     //deserialize_saved_game converts a json string in the savedGame form and turns it into a JSLevel struct
     //Essentially it converts the json object into a rust object
@@ -43,5 +43,57 @@ pub fn main() {
 
     //Note the JSLevel struct uses camel case, not snake case. This is intentional so the fields match the original json
     println!("{}",level.worldSeed); 
+}
+```
+
+Similarly, there are multiple functions for writing a level back into the savedGame format. There is functionality for just getting the raw json, for writing it to a db file, and also for writing it to a `localStorage.set()` command.
+
+```rust
+use mc-classic-js;
+
+pub fn main() {
+
+    let path = (
+        "AppData/Roaming/Mozilla/Firefox/Profiles/########.default-release/storage/default/https+++classic.minecraft.net/ls/data.sqlite"
+    );
+
+    let seed: i64 = 0; //World seeds are i64
+    let mut changed_blocks: HashMap<String, ChangedBlocks> = HashMap::new();
+    let world_size: i32 = 128;
+    let version: u8 = 1;
+
+    //get_tile_map generates the tile map for the world based on seed and world size
+    //This function calls ported classic js world gen code
+    let tile_map: Vec<u8> = get_tile_map(seed, world_size);
+    
+    let mut level: JSLevel = JSLevel::new(seed, changed_blocks, world_size, version);
+
+    //serialize_saved_game takes a js level and tilemap and writes into a savedGame json string.
+    //opt is the third argument, and that is used for optimization based on how much
+    //storage space you want the json_string to take up, as it can reach well over a 
+    //million characters. 2 is recommended, as it only writes a changedBlock if it is
+    //explicitly different from natural generation
+    //
+    //If opt == 2 the tile must differ from natural generation to write to array
+    //If opt == 1 either the tile differs from natural generation or it is already considered a changed block to write to array
+    //If opt == 0 tile is written to array
+    let json_string: String = serialize_saved_game(level, tile_map, 2);
+
+    //Alternatively, if there is not a js level object, and just a tilemap and a seed,
+    //serialize_saved_game_from_seed can be called and a seed and tile_map can be passed
+    let json_string1: String = serialize_saved_game_from_seed(seed, tile_map)
+
+    //The savedGame string can be passed to write to a db
+    write_saved_game(path, json_string);
+
+    //The savedGame string can be passed to make a localStorage.set() command
+    //This can be copy/pasted into a browser console. There is also the option
+    //to output this command to a txt file, if the path string passed is empty,
+    //it will not attempt to write to a file and just return the string
+    let set: String = write_saved_game_command("", json_string);
+
+    println!("{}",set);
+
+    
 }
 ```
