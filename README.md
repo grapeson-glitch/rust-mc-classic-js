@@ -1,2 +1,2 @@
-# ClassicJavascript-to-Java-Converter
- Program built in rust to convert javascript worlds to java worlds and vice versa
+# mc-classic-js
+ Contains functionality for reading and writing Minecraft Classic JS worlds
