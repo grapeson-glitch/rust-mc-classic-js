@@ -1,7 +1,6 @@
 # mc-classic-js
  Contains functionality for reading and writing Minecraft Classic JS worlds. 
  
- ====
  
  ## What is Minecraft Classic Javascript?
  [Minecraft Classic Javascript](https://classic.minecraft.net/) is an official Mojang port of Minecraft classic that runs inside a web browser. Instead of storing worlds as `.min` or `.dat` files, instead worlds are stored as json objects within a browser's localStorage in the following format:
@@ -25,6 +24,6 @@ mc-classic-js = "0.1.2"
 
 ```rust
 pub fn main() {
-    
+
 }
 ```
