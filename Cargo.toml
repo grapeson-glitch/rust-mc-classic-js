@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 description = "Functionality for reading and writing MineCraft Classic JS world saves"
 authors = ["Sl1mj1m"]
+license = "MIT OR Apache-2.0"
 homepage = "https://github.com/Sl1mj1m14/rust-mc-classic-js"
 repository = "https://github.com/Sl1mj1m14/rust-mc-classic-js"
 readme = "README.md"
