@@ -16,5 +16,5 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-mc-classic-js = "0.1.1"
+mc-classic-js = "0.1.2"
 ```
