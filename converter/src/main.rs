@@ -1,10 +1,16 @@
 mod random_level_worker;
 mod random;
 
-use std::collections::HashMap;
-use std::fs;
+use rusqlite::{Connection, Result};
+
 use serde::{Deserialize, Serialize};
 use serde_json;
+
+use snap;
+use snap::raw::Decoder;
+
+use std::collections::HashMap;
+use std::fs;
 
 fn main() {
     println!("Starting World Generation!");
@@ -13,12 +19,14 @@ fn main() {
     let seed: i64 = 22407532278926;
     let world_size: i32 = 128; //Accepted values - 128, 256, 512
     let file: String = String::from("../localStorage.txt");
+    let file1: String = String::from("../data.sqlite");
 
+    let temp: String = get_saved_game(file1).unwrap();
+    println!("{}",temp);
+    //let tile_map: Vec<u8> = get_tile_map(world_size, seed);
 
-    let tile_map: Vec<u8> = get_tile_map(world_size, seed);
-
-    let json_string: String = serialize_saved_game_from_seed(seed, tile_map);
-    let _unused: String = set_saved_game_command(file, json_string);
+    //let json_string: String = serialize_saved_game_from_seed(seed, tile_map);
+    //let _unused: String = set_saved_game_command(file, json_string);
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -31,29 +39,13 @@ pub struct JSLevel {
 
 impl JSLevel {
     pub fn new (worldSeed: i64, changedBlocks: HashMap<String,ChangedBlocks>, worldSize: i32, version: u8) -> Self {
-        JSLevel {
-            worldSeed,
-            changedBlocks,
-            worldSize,
-            version
-        }
+        JSLevel { worldSeed, changedBlocks, worldSize, version } 
     }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct ChangedBlocks {
-    a: u8,
-    bt: u8
-}
-
-impl ChangedBlocks {
-    pub fn new (a: u8, bt: u8) -> Self {
-        ChangedBlocks {
-            a,
-            bt
-        }
-    }
-}
+pub struct ChangedBlocks {a: u8, bt: u8}
+impl ChangedBlocks { pub fn new (a: u8, bt: u8) -> Self {ChangedBlocks { a, bt }}}
 
 /**
  * Converts a json string in the savedGame format into
@@ -157,6 +149,11 @@ pub fn serialize_saved_game (level: JSLevel, tile_map: Vec<u8>, opt: u8) -> Stri
 
 }
 
+/**
+ * Following function takes a seed and creates a JSLevel from this seed,
+ * and then compares it agains the given tilemap to create a json formatted
+ * JS world save
+ */
 pub fn serialize_saved_game_from_seed (seed: i64, tile_map: Vec<u8>) -> String {
 
     let world_size: i32 = ((tile_map.len()/64) as f64).sqrt() as i32;
@@ -181,5 +178,71 @@ pub fn set_saved_game_command (file: String, json_string: String) -> String {
     if file != "" {fs::write(file, output.clone()).expect("Error when writing to file")} //Attempting to write localStorage command to file
 
     return output;
+
+}
+
+/**
+ * Following function opens an sqlite database at the provided path,
+ * then retreives the savedGame object, and then decompresses it 
+ * before returning it
+ */
+pub fn get_saved_game (file_path: String) -> Result<String> {
+
+    struct LocalStorage {
+        key: String,
+        utf16_length: i32,
+        conversion_type: u8,
+        compression_type: u8,
+        last_access_time: u8,
+        value: Vec<u8>
+    }
+
+    let conn: Connection = Connection::open(file_path)?;
+
+    let mut stmt = conn.prepare(
+        "SELECT * FROM data;"
+    )?;
+
+    //Iterating through the database
+    let entries = stmt.query_map([], |row| Ok(
+        LocalStorage {
+            key: row.get(0)?,
+            utf16_length: row.get(1)?,
+            conversion_type: row.get(2)?,
+            compression_type: row.get(3)?,
+            last_access_time: row.get(4)?,
+            value: row.get(5)?,
+        }
+    ))?;
+
+    //Retreiving the compressed save game object and length
+    let mut compressed_saved_game: Vec<u8> = Vec::new();
+    let mut decompressed_length: i32 = 0;
+    for entry in entries {
+        let local: LocalStorage = entry.unwrap();
+        if local.key == "savedGame" {
+            compressed_saved_game = local.value;
+            decompressed_length = local.utf16_length;
+            break;
+        }
+    }
+
+    //Creating an array with the correct length for storing the decompressed bytes
+    let mut decompressed: Vec<u8> = Vec::new();
+    for _ in 0..decompressed_length {
+        decompressed.push(0);
+    }
+
+    //Decompressing using snappy compression
+    Decoder::decompress(&mut Decoder::new(), &compressed_saved_game, &mut decompressed).unwrap();
+
+    //Converting the character codes to characters
+    let mut characters: Vec<char> = Vec::new();
+    for ch in decompressed {
+        characters.push(ch as char)
+    }
+
+    //Returning the characters as a string
+    Ok(characters.iter().collect())
 
 }
