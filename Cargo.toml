@@ -1,5 +1,5 @@
 [package]
-name = "converter"
+name = "mc-classic-js"
 version = "0.1.0"
 edition = "2021"
 

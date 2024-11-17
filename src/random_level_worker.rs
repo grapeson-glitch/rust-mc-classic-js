@@ -1,3 +1,27 @@
+/**
+ * This is the ported world generation code from classic js
+ * Credit to TheSunCat for the deobfuscated js code - see js source here: 
+ * https://github.com/TheSunCat/Minecraft-Classic-Reversed/blob/master/assets/js/RandomLevelWorker.js
+ * 
+ * This is a 1:1 exact replication of js's world generation code, and
+ * it has been tested on several random seeds. If there are bugs in
+ * this, please message me on discord: sl1mj1m_ See below for known potential
+ * errors as a result of conversion.
+ * 
+ * ***Known potential errors***
+ * 
+ * Parse int has been replaced by casting. However, there are edge cases
+ * when a double is passed with a value below 0.000001. Rust treats this
+ * correctly, parsing this as 0, however js parses this as 1. Why I have
+ * no clue, and it is such an obscure edge case it has not been noticable
+ * in testing
+ * 
+ * sin() and cos() are slightly different in rust when compared to js. This
+ * is a deep level, and there is no easy fix other than rewriting js's source
+ * code and copying that sin and cos functionality. Again, this precision loss
+ * is so minor it has not been noticeable in testing.
+ */
+
 use crate::random::Random;
 use std::collections::HashMap;
 
