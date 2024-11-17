@@ -65,7 +65,7 @@ pub fn main() {
     //get_tile_map generates the tile map for the world based on seed and world size
     //This function calls ported classic js world gen code
     let tile_map: Vec<u8> = get_tile_map(seed, world_size);
-    
+
     let mut level: JSLevel = JSLevel::new(seed, changed_blocks, world_size, version);
 
     //serialize_saved_game takes a js level and tilemap and writes into a savedGame json string.
@@ -97,3 +97,20 @@ pub fn main() {
     
 }
 ```
+
+## Where is the world *actually* stored?
+
+localStorage works differently between different browsers, and currently this library only natively supports Firefox. 
+
+### Firefox
+
+Firefox local storage is stored at
+
+`C:/Users/user/AppData/Roaming/Mozilla/Firefox/Profiles/########.default-release/storage/default/`
+
+Inside this `default` folder, there are folders that correspond to each website that is currently storing data. There are only 2 that are relevant to this code, those being 
+
+`https+++classic.minecraft.net/ls/data.sqlite`
+`https+++omniarchive.uk/ls/data.sqlite`
+
+These are the two websites that currently host Minecraft Classic JS. The actual localStorage objects are stored within these `data.sqlite` as key value pairs. Additionally, snappy compression is used on all values stored inside. This means to read a `savedGame`, first the sqlite database has to be opened, then the key `savedGame` has to be found, and then it needs to be decompressed.
