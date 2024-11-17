@@ -46,7 +46,7 @@ pub fn main() {
 }
 ```
 
-Similarly, there are multiple functions for writing a level back into the savedGame format. There is functionality for just getting the raw json, for writing it to a db file, and also for writing it to a `localStorage.set()` command.
+Similarly, there are multiple functions for writing a level back into the savedGame format. There is functionality for just getting the raw json, for writing it to a db file, and also for writing it to a `localStorage.setItem()` command.
 
 ```rust
 use mc-classic-js;
@@ -86,7 +86,7 @@ pub fn main() {
     //The savedGame string can be passed to write to a db
     write_saved_game(path, json_string);
 
-    //The savedGame string can be passed to make a localStorage.set() command
+    //The savedGame string can be passed to make a localStorage.setItem() command
     //This can be copy/pasted into a browser console. There is also the option
     //to output this command to a txt file, if the path string passed is empty,
     //it will not attempt to write to a file and just return the string
@@ -116,3 +116,11 @@ https+++omniarchive.uk/ls/data.sqlite
 ```
 
 These are the two websites that currently host Minecraft Classic JS. The actual localStorage objects are stored within these `data.sqlite` as key value pairs. Additionally, snappy compression is used on all values stored inside. This means to read a `savedGame`, first the sqlite database has to be opened, then the key `savedGame` has to be found, and then it needs to be decompressed.
+
+### All Browsers
+
+To retreive localStorage manually, this can be done by inspect elementing the browser. From here, either navigate to Local Storage (location varies on browser - just use google at this point) and select the savedGame object manually, or navigate to the console, and run:
+
+```js
+localStorage.getItem("savedGame")
+```
