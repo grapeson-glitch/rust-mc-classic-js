@@ -243,7 +243,9 @@ pub fn read_saved_game (file_path: String) -> Result<String> {
  * Following function accepts a path to a db file, and a 
  * json string. The json string is parsed as the value and
  * compressed using snappy compression, and is then passed
- * to the db and saved
+ * to the db and saved. Note this only applies to Firefox,
+ * as firefox is the only browser that I know of that uses
+ * this structure. Chromium support in the future...
  */
 pub fn write_saved_game (file_path: String, json_string: String) -> Result<()> {
 
