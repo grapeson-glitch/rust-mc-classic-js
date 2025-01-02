@@ -24,10 +24,10 @@ use std::fs;
  */
 #[derive(Serialize, Deserialize)]
 pub struct JSLevel {
-    worldSeed: i64,
-    changedBlocks: HashMap<String,ChangedBlocks>,
-    worldSize: i32,
-    version: u8
+    pub worldSeed: i64,
+    pub changedBlocks: HashMap<String,ChangedBlocks>,
+    pub worldSize: i32,
+    pub version: u8
 }
 
 impl JSLevel {
@@ -46,7 +46,7 @@ impl JSLevel {
  * bt: type of block
  */
 #[derive(Serialize, Deserialize)]
-pub struct ChangedBlocks {a: u8, bt: u8}
+pub struct ChangedBlocks {pub a: u8, pub bt: u8}
 impl ChangedBlocks { pub fn new (a: u8, bt: u8) -> Self {ChangedBlocks { a, bt }}}
 
 /**
