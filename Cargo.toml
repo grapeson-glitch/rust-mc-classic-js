@@ -10,7 +10,7 @@ repository = "https://github.com/Sl1mj1m14/rust-mc-classic-js"
 readme = "README.md"
 
 [[bin]]
-name = "server"
+name = "rust-mc-classic-js"
 path = "src/main.rs"
 
 
