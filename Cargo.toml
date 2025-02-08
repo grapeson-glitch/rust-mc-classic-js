@@ -9,6 +9,11 @@ homepage = "https://github.com/Sl1mj1m14/rust-mc-classic-js"
 repository = "https://github.com/Sl1mj1m14/rust-mc-classic-js"
 readme = "README.md"
 
+[[bin]]
+name = "server"
+path = "src/main.rs"
+
+
 [dependencies]
 serde_json = "1.0.133"
 serde = { version = "1.0", features = ["derive"] }
