@@ -10,6 +10,6 @@ async fn main() {
     println!("Starting server on port: {}", port);
 
     let route = warp::path("play").map(|| warp::reply::html("Classic Minecraft JS Server Running!"));
-    
+     
     warp::serve(route).run(([0, 0, 0, 0], port)).await;
 }
